@@ -1,0 +1,26 @@
+package com.inmap.restfulApiInMap.entity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = "materia") // Debe coincidir exactamente con el nombre en Postgres
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class Materia {
+
+    @Id
+    @Column(name = "cod_materia") // Nombre exacto de la columna PK
+    private String codMateria;
+
+    @Column(name = "nombre_materia")
+    private String nombreMateria;
+}
