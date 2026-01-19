@@ -5,9 +5,10 @@ import com.inmap.restfulApiInMap.entity.Destino;
 import com.inmap.restfulApiInMap.repository.AsignacionRepository;
 import com.inmap.restfulApiInMap.repository.DestinoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
-
+@Service
 public class AsignacionServiceImplementation implements AsignacionService {
     @Autowired
     AsignacionRepository asignacionRepository;

@@ -1,12 +1,16 @@
 package com.inmap.restfulApiInMap.controller;
 
+import com.inmap.restfulApiInMap.classes.UbicacionPersonal;
 import com.inmap.restfulApiInMap.entity.Esqueleto;
 import com.inmap.restfulApiInMap.entity.Personal;
+import com.inmap.restfulApiInMap.entity.Recinto;
 import com.inmap.restfulApiInMap.interfaces.PersonalReducido;
 import com.inmap.restfulApiInMap.repository.EsqueletoRepository;
 import com.inmap.restfulApiInMap.repository.PersonalRepository;
+import com.inmap.restfulApiInMap.service.PersonalService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -15,6 +19,8 @@ import java.util.List;
 public class PersonalController {
     @Autowired
     private PersonalRepository personalRepository;
+    @Autowired
+    private PersonalService personalService;
 
     @GetMapping("/personalCompleto")
     public List<Personal> obtenerTodoPersonal() {
@@ -23,5 +29,10 @@ public class PersonalController {
     @GetMapping("/personal")
     public List<PersonalReducido> findAllOrderByApellido(){
         return personalRepository.findAllOrderByApellido();
+    }
+    @GetMapping("/personal/{id}/{hora}/{dia}")
+    public List<UbicacionPersonal> findUbicacionCompletaNative(@PathVariable String id,@PathVariable String dia,@PathVariable String hora)
+    {
+        return personalService.findUbicacionCompletaNative(id, dia, hora);
     }
 }

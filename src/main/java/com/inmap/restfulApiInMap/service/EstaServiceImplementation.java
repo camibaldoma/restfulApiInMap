@@ -5,9 +5,10 @@ import com.inmap.restfulApiInMap.entity.Tiene_asociado;
 import com.inmap.restfulApiInMap.repository.EstaRepository;
 import com.inmap.restfulApiInMap.repository.Tiene_asociadoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
-
+@Service
 public class EstaServiceImplementation implements EstaService {
 
     @Autowired

@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 public class Materia {
 
     @Id
-    @Column(name = "cod_materia") // Nombre exacto de la columna PK
+    @Column(name = "cod_materia", length = 3)
     private String codMateria;
 
     @Column(name = "nombre_materia")
