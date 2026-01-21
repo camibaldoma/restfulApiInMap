@@ -9,8 +9,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
+//@Entity define la entidad como persistible
 @Entity
-@Table(name = "personal") // Debe coincidir exactamente con el nombre en Postgres
+// Esta anotación define contra que tabla de la base de datos la entidad se va a mapear
+@Table(name = "personal")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -35,8 +38,8 @@ public class Personal {
     @JsonIgnore // para que no se duplique en el JSON
     private String nombre_completo;
 
-    // Este método genera la columna para el JSON de forma dinámica
-    @JsonProperty("nombreCompleto") // Esto le dice a Jackson: "incluye esto en el JSON"
+    // Este metodo genera la columna para el JSON de forma dinámica
+    @JsonProperty("nombreCompleto") // Esto hace que se incluya en el JSON
     public String getNombreCompleto() {
         // Si el SQL nativo llenó 'nombre_completo', se usa.
         // Si no (por ejemplo en un findAll común), se calcula.

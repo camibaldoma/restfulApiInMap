@@ -9,10 +9,12 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-@Repository
-public interface PersonalRepository extends JpaRepository<Personal, String> {
-    //Consultas nativas de SQL
 
+//Interfaz del repositorio que extiende JpaRepository. Proporciona varios métodos preconfigurados para realizar operaciones CRUD en la entidad.
+@Repository //Marca la interfaz como un repositorio JPA de Spring Data.
+public interface PersonalRepository extends JpaRepository<Personal, String> {
+    //@Query: Define una consulta JPQL personalizada o SQL nativa para una entidad.
+    //Consultas nativas de SQL
     @Query(value = "SELECT p.id_personal AS idPersonal, " +
             "(p.nombre_personal || ' ' || p.apellido_personal) AS nombreCompleto, " +
             "p.cargo_laboral AS cargoLaboral " +

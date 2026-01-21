@@ -9,9 +9,12 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
+//@Entity define la entidad como persistible
 @Entity
-@Table(name = "esta") // Debe coincidir exactamente con el nombre en Postgres
-@IdClass(EstaId.class)
+//Esta anotación define contra que tabla de la base de datos la entidad se va a mapear
+@Table(name = "esta")
+@IdClass(EstaId.class) //Se usa para manejar claves primarias compuestas definiendo una clase separada (que implementa Serializable) para el ID
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

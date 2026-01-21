@@ -3,6 +3,7 @@ package com.inmap.restfulApiInMap.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.inmap.restfulApiInMap.classes.GeoJsonHelper;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,71 +17,33 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
+//@Entity define la entidad como persistible
 @Entity
-@Table(name = "esqueleto") // Debe coincidir exactamente con el nombre en Postgres
+// Esta anotación define contra que tabla de la base de datos la entidad se va a mapear
+@Table(name = "esqueleto")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class Esqueleto {
-    @Id
-    @Column(name = "id_esqueleto") // Nombre exacto de la columna PK
+    @Id //Marca el atributo como la clave primaria de la entidad
+    @Column(name = "id_esqueleto") // Permite personalizar el mapeo entre el atributo de la clase y la columna en la tabla de la base de datos. Nombre exacto de la columna
     private String idEsqueleto;
 
-    @JsonIgnore
-    @JdbcTypeCode(org.hibernate.type.SqlTypes.GEOMETRY)
+    @JsonIgnore //Se usa en entidades JPA para ocultar campos específicos durante la serialización a JSON
+    @JdbcTypeCode(org.hibernate.type.SqlTypes.GEOMETRY) //Usada para especificar manualmente el tipo JDBC exacto para un atributo de entidad cuando Hibernate no puede inferirlo automáticamente
     @Column(name = "geom")
     private Geometry geometria;
 
-    @JsonProperty("geometria")
+    @JsonProperty("geometria") //Se usa en clases de modelo para mapear nombres de campos Java a nombres de propiedades JSON diferentes
     public Map<String, Object> getGeometriaGeoJson() {
         if (geometria == null) return null;
 
         Map<String, Object> geoJson = new HashMap<>();
         geoJson.put("type", geometria.getGeometryType());
-        geoJson.put("coordinates", convertToCoordinates(geometria));
+        geoJson.put("coordinates", GeoJsonHelper.convertToCoordinates(geometria));
         return geoJson;
     }
 
-    private Object convertToCoordinates(Geometry geometry) {
-        if (geometry instanceof org.locationtech.jts.geom.Point p) {
-            return new double[]{p.getX(), p.getY()};
-        } else if (geometry instanceof org.locationtech.jts.geom.LineString line) {
-            return coordsToList(line.getCoordinates());
-        } else if (geometry instanceof org.locationtech.jts.geom.MultiLineString mLine) {
-            List<List<double[]>> lines = new ArrayList<>();
-            for (int i = 0; i < mLine.getNumGeometries(); i++) {
-                lines.add(coordsToList(mLine.getGeometryN(i).getCoordinates()));
-            }
-            return lines;
-        } else if (geometry instanceof org.locationtech.jts.geom.Polygon poly) {
-            return extractCoordsFromPolygon(poly);
-        } else if (geometry instanceof org.locationtech.jts.geom.MultiPolygon mPoly) {
-            List<Object> coords = new ArrayList<>();
-            for (int i = 0; i < mPoly.getNumGeometries(); i++) {
-                coords.add(extractCoordsFromPolygon((org.locationtech.jts.geom.Polygon) mPoly.getGeometryN(i)));
-            }
-            return coords;
-        }
-        return null;
-    }
-
-    private List<List<double[]>> extractCoordsFromPolygon(org.locationtech.jts.geom.Polygon poly) {
-        List<List<double[]>> rings = new ArrayList<>();
-        // Exterior ring
-        rings.add(coordsToList(poly.getExteriorRing().getCoordinates()));
-        // Interior rings (huecos)
-        for (int i = 0; i < poly.getNumInteriorRing(); i++) {
-            rings.add(coordsToList(poly.getInteriorRingN(i).getCoordinates()));
-        }
-        return rings;
-    }
-
-    private List<double[]> coordsToList(org.locationtech.jts.geom.Coordinate[] coords) {
-        List<double[]> list = new ArrayList<>();
-        for (org.locationtech.jts.geom.Coordinate c : coords) {
-            list.add(new double[]{c.x, c.y});
-        }
-        return list;
-    }
 }

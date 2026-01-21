@@ -17,8 +17,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
+//@Entity define la entidad como persistible
 @Entity
-@Table(name = "recinto") // Debe coincidir exactamente con el nombre en Postgres
+// Esta anotación define contra que tabla de la base de datos la entidad se va a mapear
+@Table(name = "recinto")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -42,7 +45,7 @@ public class Recinto {
         geoJson.put("coordinates", GeoJsonHelper.convertToCoordinates(geometria));
         return geoJson;
     }
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "id_destino")
     private Destino destino;
 

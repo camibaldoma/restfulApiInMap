@@ -12,9 +12,10 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalTime;
 import java.util.List;
 
-@Repository
+//Interfaz del repositorio que extiende JpaRepository. Proporciona varios métodos preconfigurados para realizar operaciones CRUD en la entidad.
+@Repository //Marca la interfaz como un repositorio JPA de Spring Data.
 public interface RecintoRepository extends JpaRepository<Recinto, String> {
-
+    //@Query: Define una consulta JPQL personalizada o SQL nativa para una entidad.
     //JPQL
     //Como ya se configuró la relación entre Destino y Recinto dentro de la entidad Recinto
     // (@ManyToOne), no se necesita hacer el JOIN manualmente en la consulta.

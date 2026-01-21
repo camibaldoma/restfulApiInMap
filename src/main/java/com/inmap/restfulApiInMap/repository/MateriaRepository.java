@@ -11,9 +11,11 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalTime;
 import java.util.List;
-@Repository
-public interface MateriaRepository extends JpaRepository<Materia, String> {
 
+//Interfaz del repositorio que extiende JpaRepository. Proporciona varios métodos preconfigurados para realizar operaciones CRUD en la entidad.
+@Repository //Marca la interfaz como un repositorio JPA de Spring Data.
+public interface MateriaRepository extends JpaRepository<Materia, String> {
+    //@Query: Define una consulta JPQL personalizada o SQL nativa para una entidad.
     //Si se devuelve el recinto, también se puede obtener la información del destino
     //Con JPQL
     @Query("SELECT r FROM Recinto r " +

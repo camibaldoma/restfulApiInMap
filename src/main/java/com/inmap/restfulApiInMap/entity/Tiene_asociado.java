@@ -11,8 +11,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import jakarta.persistence.Id;
 
+
+//@Entity define la entidad como persistible
 @Entity
-@Table(name = "tiene_asociado") // Debe coincidir exactamente con el nombre en Postgres
+// Esta anotación define contra que tabla de la base de datos la entidad se va a mapear
+@Table(name = "tiene_asociado")
 @IdClass(TieneAsociadoId.class)
 @Data
 @AllArgsConstructor

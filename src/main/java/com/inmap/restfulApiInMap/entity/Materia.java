@@ -9,7 +9,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
+//@Entity define la entidad como persistible
 @Entity
+// Esta anotación define contra que tabla de la base de datos la entidad se va a mapear
 @Table(name = "materia") // Debe coincidir exactamente con el nombre en Postgres
 @Data
 @AllArgsConstructor

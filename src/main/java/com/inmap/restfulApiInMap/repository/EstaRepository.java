@@ -5,6 +5,8 @@ import com.inmap.restfulApiInMap.entity.Tiene_asociado;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-@Repository
+
+//Interfaz del repositorio que extiende JpaRepository. Proporciona varios métodos preconfigurados para realizar operaciones CRUD en la entidad.
+@Repository //Marca la interfaz como un repositorio JPA de Spring Data.
 public interface EstaRepository extends JpaRepository<Esta, String> {
 }
