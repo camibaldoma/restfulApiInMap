@@ -2,7 +2,9 @@ package com.inmap.restfulApiInMap.classes;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.locationtech.jts.geom.Geometry;
 
 import java.util.HashMap;
@@ -10,6 +12,8 @@ import java.util.Map;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class UbicacionPersonal {
 
     private String idDestino;
@@ -19,6 +23,7 @@ public class UbicacionPersonal {
 
     // Hibernate inyectará aquí el objeto JTS correctamente
     private Geometry geometria;
+
 
     @JsonProperty("geometria")
     public Map<String, Object> getGeometriaGeoJson() {

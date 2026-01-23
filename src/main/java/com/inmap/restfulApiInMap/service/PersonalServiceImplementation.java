@@ -41,7 +41,7 @@ public class PersonalServiceImplementation implements PersonalService{
             //Se convierte a JTS (Lo que  clase UbicacionPersonal espera)
             Geometry jtsGeom = JTS.to(geoLatteGeom);
 
-            //Se crea el ibjeto
+            //Se crea el objeto
             return new UbicacionPersonal(
                     (String) fila[0],
                     (String) fila[1],
