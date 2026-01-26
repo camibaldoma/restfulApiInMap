@@ -17,18 +17,17 @@ import java.util.List;
 
 @RestController
 public class PersonalController {
-    @Autowired
-    private PersonalRepository personalRepository;
+
     @Autowired
     private PersonalService personalService;
 
     @GetMapping("/personalCompleto")
     public List<Personal> obtenerTodoPersonal() {
-        return personalRepository.findAll();
+        return personalService.obtenerTodoPersonal();
     }
     @GetMapping("/personal")
     public List<PersonalReducido> findAllOrderByApellido(){
-        return personalRepository.findAllOrderByApellido();
+        return personalService.findAllOrderByApellido();
     }
     @GetMapping("/personal/{id}/{hora}/{dia}")
     public List<UbicacionPersonal> findUbicacionCompletaNative(@PathVariable String id,@PathVariable String dia,@PathVariable String hora)

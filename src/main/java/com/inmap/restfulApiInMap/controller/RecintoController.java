@@ -16,18 +16,17 @@ import java.util.List;
 @RestController
 public class RecintoController {
     @Autowired
-    private RecintoRepository recintoRepository;
-    @Autowired
     private RecintoService recintoService;
+
     @GetMapping("/recintos")
     public List<Recinto> obtenerTodosRecintos() {
-        return recintoRepository.findAll();
+        return recintoService.obtenerTodosRecintos();
     }
     @GetMapping("/recintos/{id}")
     public List<Recinto> findRecinto(@PathVariable String id){
-        return recintoRepository.findRecinto(id);
+        return recintoService.findRecinto(id);
     }
     @GetMapping("/informacionRecintos/{id}/{hora}/{dia}")
-    public List<InformacionRecinto> findInformation(@PathVariable String id, @PathVariable String hora, @PathVariable String dia ){return recintoRepository.findInformation(id,hora,dia);}
+    public List<InformacionRecinto> findInformation(@PathVariable String id, @PathVariable String hora, @PathVariable String dia ){return recintoService.findInformation(id,hora,dia);}
 
 }
