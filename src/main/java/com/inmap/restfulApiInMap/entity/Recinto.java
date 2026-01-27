@@ -31,7 +31,7 @@ public class Recinto {
     @Column(name = "id_recinto") // Nombre exacto de la columna PK
     private String idRecinto;
 
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @JdbcTypeCode(org.hibernate.type.SqlTypes.GEOMETRY)
     @Column(name = "geom")
     private Geometry geometria;
@@ -45,7 +45,9 @@ public class Recinto {
         geoJson.put("coordinates", GeoJsonHelper.convertToCoordinates(geometria));
         return geoJson;
     }
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL) //Cuando se haga recintoRepository.save(recinto),
+    // Hibernate mirará el objeto Destino que está adentro. Si el idDestino es nuevo, lo insertará automáticamente.
+    // Si ya existe, simplemente hará el vínculo.
     @JoinColumn(name = "id_destino")
     private Destino destino;
 

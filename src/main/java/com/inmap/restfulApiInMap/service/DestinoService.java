@@ -8,4 +8,7 @@ import java.util.List;
 public interface DestinoService {
     List<Destino> obtenerTodosDestinos();
     List<DestinoReducido> findDestino(String id_destino);
+    Destino saveDestino(Destino destino);
+    Destino updateDestino(String id, Destino destino);
+    void deleteDestino(String id);
 }

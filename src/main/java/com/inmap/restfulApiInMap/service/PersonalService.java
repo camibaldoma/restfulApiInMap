@@ -12,4 +12,7 @@ public interface PersonalService {
     List<Personal> obtenerTodoPersonal();
     List<PersonalReducido> findAllOrderByApellido();
     List<UbicacionPersonal> findUbicacionCompletaNative(String id, String dia, String hora);
+    Personal savePersonal(Personal personal);
+    Personal updatePersonal(String idPersonal, Personal personal);
+    void deletePersonal(String idPersonal);
 }

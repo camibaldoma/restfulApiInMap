@@ -36,7 +36,7 @@ public class Destino {
     @Column(name = "nombre_destino")
     private String nombreDestino;
 
-    @JsonIgnore //Se usa en entidades JPA para ocultar campos específicos durante la serialización a JSON
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) //solo se ignore al enviar datos (serialización) pero se permita al recibir (deserialización)
     @JdbcTypeCode(org.hibernate.type.SqlTypes.GEOMETRY) //Usada para especificar manualmente el tipo JDBC exacto para un atributo de entidad cuando Hibernate no puede inferirlo automáticamente
     @Column(name = "geom")
     private Geometry geometria;

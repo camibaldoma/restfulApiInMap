@@ -6,8 +6,7 @@ import com.inmap.restfulApiInMap.repository.HorarioRepository;
 import com.inmap.restfulApiInMap.repository.MateriaRepository;
 import com.inmap.restfulApiInMap.service.HorarioService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -21,4 +20,20 @@ public class HorarioController {
     public List<Horario> obtenerTodosHorarios() {
         return horarioService.obtenerTodosHorarios();
     }
+
+    @PostMapping("/guardarHorario")
+    public Horario saveHorario(@RequestBody Horario horario) {
+        return horarioService.saveHorario(horario);
+    }
+
+    @PutMapping("/actualizarHorario/{id}")
+    public Horario updateHorario(@PathVariable String id, @RequestBody Horario horario) {
+        return horarioService.updateHorario(id, horario);
+    }
+
+    @DeleteMapping("/eliminarHorario/{id}")
+    public void deleteHorario(@PathVariable String id) {
+        horarioService.deleteHorario(id);
+    }
+
 }

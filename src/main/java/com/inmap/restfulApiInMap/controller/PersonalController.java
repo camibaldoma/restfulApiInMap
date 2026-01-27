@@ -9,9 +9,7 @@ import com.inmap.restfulApiInMap.repository.EsqueletoRepository;
 import com.inmap.restfulApiInMap.repository.PersonalRepository;
 import com.inmap.restfulApiInMap.service.PersonalService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -33,5 +31,17 @@ public class PersonalController {
     public List<UbicacionPersonal> findUbicacionCompletaNative(@PathVariable String id,@PathVariable String dia,@PathVariable String hora)
     {
         return personalService.findUbicacionCompletaNative(id, dia, hora);
+    }
+    @PostMapping("/guardarPersonal")
+    public Personal savePersonal(@RequestBody Personal personal) {
+        return personalService.savePersonal(personal);
+    }
+    @PutMapping("/actualizarPersonal/{id}")
+    public Personal updatePersonal(@PathVariable String id, @RequestBody Personal personal) {
+        return personalService.updatePersonal(id, personal);
+    }
+    @DeleteMapping("/eliminarPersonal/{id}")
+    public void deletePersonal(@PathVariable String id) {
+        personalService.deletePersonal(id);
     }
 }

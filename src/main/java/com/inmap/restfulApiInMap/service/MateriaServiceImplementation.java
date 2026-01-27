@@ -10,6 +10,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
+
 @Service
 public class MateriaServiceImplementation implements MateriaService {
     @Autowired
@@ -22,5 +24,27 @@ public class MateriaServiceImplementation implements MateriaService {
     public List<Recinto> findMateria(String id,String hora,String dia)
     {
         return materiaRepository.findMateria(id,hora,dia);
+    }
+
+    @Override
+    public Materia saveMateria(Materia materia) {
+        return materiaRepository.save(materia);
+    }
+
+    @Override
+    public Materia updateMateria(String id,Materia materia) {
+        Materia materiaToUpdate = materiaRepository.findById(id).get();
+        if(Objects.nonNull(materiaToUpdate.getCodMateria()) && !"".equalsIgnoreCase(materiaToUpdate.getCodMateria())){
+            materiaToUpdate.setCodMateria(materia.getCodMateria());
+        }
+        if(Objects.nonNull(materiaToUpdate.getNombreMateria()) && !"".equalsIgnoreCase(materiaToUpdate.getNombreMateria())){
+            materiaToUpdate.setNombreMateria(materia.getNombreMateria());
+        }
+        return materiaRepository.save(materiaToUpdate);
+    }
+
+    @Override
+    public void deleteMateria(String idMateria) {
+        materiaRepository.deleteById(idMateria);
     }
 }

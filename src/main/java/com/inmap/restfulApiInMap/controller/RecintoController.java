@@ -7,9 +7,7 @@ import com.inmap.restfulApiInMap.repository.DestinoRepository;
 import com.inmap.restfulApiInMap.repository.RecintoRepository;
 import com.inmap.restfulApiInMap.service.RecintoService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -29,4 +27,18 @@ public class RecintoController {
     @GetMapping("/informacionRecintos/{id}/{hora}/{dia}")
     public List<InformacionRecinto> findInformation(@PathVariable String id, @PathVariable String hora, @PathVariable String dia ){return recintoService.findInformation(id,hora,dia);}
 
+    @PostMapping("/guardarRecinto")
+    public Recinto saveRecinto(@RequestBody Recinto recinto){
+        return recintoService.saveRecinto(recinto);
+    }
+
+    @PutMapping("/actualizarRecinto/{id}")
+    public Recinto updateRecinto(@PathVariable String id, @RequestBody Recinto recinto){
+        return recintoService.updateRecinto(id, recinto);
+    }
+
+    @DeleteMapping("/eliminarRecinto/{id}")
+    public void deleteRecinto(@PathVariable String id){
+        recintoService.deleteRecinto(id);
+    }
 }
