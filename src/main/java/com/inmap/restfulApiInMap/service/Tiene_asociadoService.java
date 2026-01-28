@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface Tiene_asociadoService {
     List<Tiene_asociado> obtenerTodosAsociados();
+    Tiene_asociado saveTiene_asociado(Tiene_asociado tiene);
+    void deleteTiene_asociado(String idPersonal,String idDestino);
 }

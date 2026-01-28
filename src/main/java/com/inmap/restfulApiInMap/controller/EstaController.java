@@ -6,8 +6,7 @@ import com.inmap.restfulApiInMap.repository.EstaRepository;
 import com.inmap.restfulApiInMap.repository.Tiene_asociadoRepository;
 import com.inmap.restfulApiInMap.service.EstaService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -20,5 +19,14 @@ public class EstaController {
     @GetMapping("/esta")
     public List<Esta> obtenerTodosEsta() {
         return estaService.obtenerTodosEsta();
+    }
+
+    @PostMapping("/guardarEsta")
+    public Esta saveEsta(@RequestBody Esta esta) {
+        return estaService.saveEsta(esta);
+    }
+    @DeleteMapping("/eliminarEsta/{idPersonal}/{idAsignacion}")
+    public void eliminarEsta(@PathVariable String idPersonal,@PathVariable String idAsignacion) {
+        estaService.deleteEsta(idPersonal, idAsignacion);
     }
 }

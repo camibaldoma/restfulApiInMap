@@ -6,8 +6,7 @@ import com.inmap.restfulApiInMap.repository.AsignacionRepository;
 import com.inmap.restfulApiInMap.repository.DestinoRepository;
 import com.inmap.restfulApiInMap.service.AsignacionService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -22,5 +21,17 @@ public class AsignacionController {
     @GetMapping("/asignaciones")
     public List<Asignacion> obtenerTodoasAsignaciones() {
         return asignacionService.obtenerTodasAsignaciones(); // Esto hace el SELECT * FROM destino automáticamente
+    }
+    @PostMapping("/guardarAsignacion")
+    public Asignacion saveAsignacion(@RequestBody Asignacion asignacion) {
+        return asignacionService.saveAsignacion(asignacion);
+    }
+    @PutMapping("/actualizarAsignacion/{id}")
+    public Asignacion updateAsignacion(@PathVariable String id, @RequestBody Asignacion asignacion) {
+        return asignacionService.updateAsignacion(id, asignacion);
+    }
+    @DeleteMapping("/eliminarAsignacion/{id}")
+    public void deleteAsignacion(@PathVariable String id) {
+        asignacionService.deleteAsignacion(id);
     }
 }

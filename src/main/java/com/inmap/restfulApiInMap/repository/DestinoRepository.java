@@ -18,4 +18,5 @@ public interface DestinoRepository extends JpaRepository<Destino, String> {
     @Query("SELECT new com.inmap.restfulApiInMap.classes.DestinoReducido( d.nombreDestino, d.geometria) " +
             "FROM Destino d WHERE d.idDestino = :id")
     List<DestinoReducido> findDestino(@Param("id") String id);
+
 }

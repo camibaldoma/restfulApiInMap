@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface EstaService {
     List<Esta> obtenerTodosEsta();
+    Esta saveEsta(Esta esta);
+    void deleteEsta(String idPersonal, String idAsignacion);
 }
