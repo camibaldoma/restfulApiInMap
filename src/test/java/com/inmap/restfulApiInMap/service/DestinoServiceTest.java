@@ -3,6 +3,7 @@ package com.inmap.restfulApiInMap.service;
 import com.inmap.restfulApiInMap.classes.DestinoReducido;
 import com.inmap.restfulApiInMap.entity.Destino;
 import com.inmap.restfulApiInMap.entity.Recinto;
+import com.inmap.restfulApiInMap.error.NotFoundException;
 import com.inmap.restfulApiInMap.repository.DestinoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,7 +42,7 @@ class DestinoServiceTest {
     }
 
     @Test
-    void findDestino() {
+    void findDestino() throws NotFoundException {
         String id = "D50";
         List<DestinoReducido> resultados =  destinoService.findDestino(id);
         assertNotNull(resultados);

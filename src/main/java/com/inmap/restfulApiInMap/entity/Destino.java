@@ -5,6 +5,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.inmap.restfulApiInMap.classes.GeoJsonHelper;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -31,14 +34,18 @@ import java.util.Map;
 public class Destino {
     @Id //Marca el atributo como la clave primaria de la entidad
     @Column(name = "id_destino") // Permite personalizar el mapeo entre el atributo de la clase y la columna en la tabla de la base de datos. Nombre exacto de la columna
+    @NotBlank(message = "El ID no puede estar vacío")
+    @NotNull(message = "El ID es obligatorio")
     private String idDestino;
 
     @Column(name = "nombre_destino")
+    @Size(min = 2, message = "El nombre es muy corto")
     private String nombreDestino;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) //solo se ignore al enviar datos (serialización) pero se permita al recibir (deserialización)
     @JdbcTypeCode(org.hibernate.type.SqlTypes.GEOMETRY) //Usada para especificar manualmente el tipo JDBC exacto para un atributo de entidad cuando Hibernate no puede inferirlo automáticamente
     @Column(name = "geom")
+    @NotNull(message = "La geometría es obligatoria")
     private Geometry geometria;
 
     @JsonProperty("geometria") //Se usa en clases de modelo para mapear nombres de campos Java a nombres de propiedades JSON diferentes

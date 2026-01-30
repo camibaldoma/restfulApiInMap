@@ -4,6 +4,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,8 +25,13 @@ public class Materia {
 
     @Id
     @Column(name = "cod_materia", length = 3)
+    @NotBlank(message = "El código de la materia no puede estar vacío")
+    @NotNull(message = "El el código de la materia es obligatorio")
     private String codMateria;
 
     @Column(name = "nombre_materia")
+    @Size(min = 2, message = "El nombre es muy corto")
+    @NotBlank(message = "El nombre no puede estar vacío")
+    @NotNull(message = "El nombre es obligatorio")
     private String nombreMateria;
 }

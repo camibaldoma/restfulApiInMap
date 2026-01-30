@@ -2,6 +2,8 @@ package com.inmap.restfulApiInMap.service;
 
 import com.inmap.restfulApiInMap.classes.DestinoReducido;
 import com.inmap.restfulApiInMap.entity.Destino;
+import com.inmap.restfulApiInMap.error.ArgumentNotValidException;
+import com.inmap.restfulApiInMap.error.NotFoundException;
 import com.inmap.restfulApiInMap.repository.DestinoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,32 +20,49 @@ public class DestinoServiceImplementation implements DestinoService {
         return destinoRepository.findAll();
     }
     @Override
-    public List<DestinoReducido> findDestino(String id_destino){
-        return destinoRepository.findDestino(id_destino);
+    public List<DestinoReducido> findDestino(String id_destino)  throws NotFoundException {
+        List<DestinoReducido> destinos = destinoRepository.findDestino(id_destino);
+        if(destinos == null || destinos.isEmpty())
+        {
+            throw new NotFoundException("Destino no encontrado");
+        }
+        else {
+            return destinos;
+        }
+
     }
 
     @Override
-    public Destino saveDestino(Destino destino) {
+    public Destino saveDestino(Destino destino) throws ArgumentNotValidException {
+        if (destinoRepository.existsById(destino.getIdDestino())) {
+            throw new ArgumentNotValidException("El ID ya existe, no se puede usar uno duplicado");
+        }
         return destinoRepository.save(destino);
     }
 
     @Override
-    public Destino updateDestino(String id, Destino destino) {
-        Destino destinoToUpdate = destinoRepository.findById(id).get();
-        if(Objects.nonNull(destinoToUpdate.getIdDestino()) && !"".equalsIgnoreCase(destinoToUpdate.getIdDestino())){
-            destinoToUpdate.setIdDestino(destino.getIdDestino());
+    public Destino updateDestino(String id, Destino destino)  throws NotFoundException,ArgumentNotValidException {
+
+        Destino destinoToUpdate = destinoRepository.findById(id).orElseThrow(() -> new NotFoundException("Destino no encontrado"));
+        if (destino.getIdDestino() != null && !id.equals(destino.getIdDestino())) {
+            throw new ArgumentNotValidException("No está permitido cambiar el ID de un destino.");
         }
-        if(Objects.nonNull(destinoToUpdate.getNombreDestino()) && !"".equalsIgnoreCase(destinoToUpdate.getNombreDestino())){
+        if(Objects.nonNull(destino.getIdDestino()) && !"".equalsIgnoreCase(destino.getIdDestino())){
+            //El id del destino no puede actualizarse
+            //destinoToUpdate.setIdDestino(destino.getIdDestino());
+        }
+        if(Objects.nonNull(destino.getNombreDestino())){
             destinoToUpdate.setNombreDestino(destino.getNombreDestino());
         }
-        if(Objects.nonNull(destinoToUpdate.getGeometria())){
+        if(Objects.nonNull(destino.getGeometria())){
             destinoToUpdate.setGeometria(destino.getGeometria());
         }
-        return destinoRepository.save(destino);
+        return destinoRepository.save(destinoToUpdate);
     }
 
     @Override
-    public void deleteDestino(String id) {
+    public void deleteDestino(String id)  throws NotFoundException {
+        Destino destinoToDelete = destinoRepository.findById(id).orElseThrow(() -> new NotFoundException("Destino no encontrado"));
         destinoRepository.deleteById(id);
     }
 

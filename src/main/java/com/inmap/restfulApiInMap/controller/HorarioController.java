@@ -5,6 +5,7 @@ import com.inmap.restfulApiInMap.entity.Materia;
 import com.inmap.restfulApiInMap.repository.HorarioRepository;
 import com.inmap.restfulApiInMap.repository.MateriaRepository;
 import com.inmap.restfulApiInMap.service.HorarioService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,12 +23,12 @@ public class HorarioController {
     }
 
     @PostMapping("/guardarHorario")
-    public Horario saveHorario(@RequestBody Horario horario) {
+    public Horario saveHorario(@Valid @RequestBody Horario horario) {
         return horarioService.saveHorario(horario);
     }
 
     @PutMapping("/actualizarHorario/{id}")
-    public Horario updateHorario(@PathVariable String id, @RequestBody Horario horario) {
+    public Horario updateHorario(@PathVariable String id, @Valid @RequestBody Horario horario) {
         return horarioService.updateHorario(id, horario);
     }
 

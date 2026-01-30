@@ -3,6 +3,8 @@ package com.inmap.restfulApiInMap.service;
 import com.inmap.restfulApiInMap.classes.UbicacionPersonal;
 import com.inmap.restfulApiInMap.entity.Personal;
 import com.inmap.restfulApiInMap.entity.Recinto;
+import com.inmap.restfulApiInMap.error.ArgumentNotValidException;
+import com.inmap.restfulApiInMap.error.NotFoundException;
 import com.inmap.restfulApiInMap.interfaces.PersonalReducido;
 import com.inmap.restfulApiInMap.repository.PersonalRepository;
 import com.inmap.restfulApiInMap.repository.RecintoRepository;
@@ -32,9 +34,22 @@ public class PersonalServiceImplementation implements PersonalService{
     }
 
     @Override
-    public List<UbicacionPersonal> findUbicacionCompletaNative(String id,String dia,String hora)
+    public List<UbicacionPersonal> findUbicacionCompletaNative(String id,String dia,String hora) throws NotFoundException
     {
         List<Object[]> resultados = personalRepository.findUbicacionCompletaNative(id, dia, hora);
+        if(resultados == null || resultados.isEmpty())
+        {
+            if(personalRepository.existsById(id))
+            {
+                //El personal existe, pero no está presente en el momento de la consulta.
+                throw new NotFoundException("El miembro del personal de la facultad con id= "+ id + " no se encuentra presente en este momento en el establecimiento.");
+            }
+            else{
+                //El personal no existe.
+                throw new NotFoundException("Ubicación no encontrada. El id no corresponde a ningún miembro del personal de la facultad.");
+            }
+
+        }
         return resultados.stream().map(fila -> {
             //Se recibe lo que Hibernate manda (Geolatte)
             org.geolatte.geom.Geometry<?> geoLatteGeom = (org.geolatte.geom.Geometry<?>) fila[4];
@@ -55,27 +70,31 @@ public class PersonalServiceImplementation implements PersonalService{
 
     @Override
     public Personal savePersonal(Personal personal) {
+        if (personalRepository.existsById(personal.getIdPersonal())) {
+            throw new ArgumentNotValidException("El ID ya existe, no se puede usar uno duplicado");
+        }
         return personalRepository.save(personal);
     }
 
     @Override
     public Personal updatePersonal(String idPersonal, Personal personal) {
-        Personal personalToUpdate = personalRepository.findById(idPersonal).get();
-        //Se verifica que el id del Personal traido de la base de datos no sea nulo
-        //ni que la información esté vacía
-        if(Objects.nonNull(personalToUpdate.getIdPersonal()) && !"".equalsIgnoreCase(personalToUpdate.getIdPersonal())){
+        Personal personalToUpdate = personalRepository.findById(idPersonal).orElseThrow(() -> new NotFoundException("Miembro del personal no encontrado"));
+        if (personal.getIdPersonal() != null && !idPersonal.equals(personal.getIdPersonal())) {
+            throw new ArgumentNotValidException("No está permitido cambiar el ID de un miembro del personal.");
+        }
+        if(Objects.nonNull(personal.getIdPersonal()) && !"".equalsIgnoreCase(personal.getIdPersonal())){
             personalToUpdate.setIdPersonal(personal.getIdPersonal());
         }
-        if(Objects.nonNull(personalToUpdate.getNombrePersonal()) && !"".equalsIgnoreCase(personalToUpdate.getNombrePersonal())){
+        if(Objects.nonNull(personal.getNombrePersonal()) && !"".equalsIgnoreCase(personal.getNombrePersonal())){
             personalToUpdate.setNombrePersonal(personal.getNombrePersonal());
         }
-        if(Objects.nonNull(personalToUpdate.getApellidoPersonal()) && !"".equalsIgnoreCase(personalToUpdate.getApellidoPersonal())){
+        if(Objects.nonNull(personal.getApellidoPersonal()) && !"".equalsIgnoreCase(personal.getApellidoPersonal())){
             personalToUpdate.setApellidoPersonal(personal.getApellidoPersonal());
         }
-        if(Objects.nonNull(personalToUpdate.getCargoLaboral()) && !"".equalsIgnoreCase(personalToUpdate.getCargoLaboral())){
+        if(Objects.nonNull(personal.getCargoLaboral()) && !"".equalsIgnoreCase(personal.getCargoLaboral())){
             personalToUpdate.setCargoLaboral(personal.getCargoLaboral());
         }
-        if(Objects.nonNull(personalToUpdate.getDni()) && !"".equalsIgnoreCase(personalToUpdate.getDni())){
+        if(Objects.nonNull(personal.getDni()) && !"".equalsIgnoreCase(personal.getDni())){
             personalToUpdate.setDni(personal.getDni());
         }
         return personalRepository.save(personalToUpdate);
@@ -83,6 +102,7 @@ public class PersonalServiceImplementation implements PersonalService{
 
     @Override
     public void deletePersonal(String idPersonal) {
+        Personal personalToDelete = personalRepository.findById(idPersonal).orElseThrow(() -> new NotFoundException("Miembro del personal no encontrado"));
         personalRepository.deleteById(idPersonal);
     }
 }

@@ -2,6 +2,7 @@ package com.inmap.restfulApiInMap.service;
 
 import com.inmap.restfulApiInMap.classes.InformacionRecinto;
 import com.inmap.restfulApiInMap.entity.*;
+import com.inmap.restfulApiInMap.error.NotFoundException;
 import com.inmap.restfulApiInMap.repository.RecintoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -105,7 +106,7 @@ class RecintoServiceTest {
 
 
     @Test
-    void findRecinto() {
+    void findRecinto() throws NotFoundException {
         String id = "R50";
         List<Recinto> resultado = recintoService.findRecinto(id);
         assertNotNull(resultado);
@@ -115,7 +116,7 @@ class RecintoServiceTest {
     }
 
     @Test
-    void findInformation() {
+    void findInformation() throws NotFoundException {
         // Se prueba buscar a las 09:00 (en medio de la clase)
         String id = "R50";
         String horaConsulta = "09:00:00";
