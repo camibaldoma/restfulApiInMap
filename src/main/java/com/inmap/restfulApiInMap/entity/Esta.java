@@ -4,6 +4,8 @@ package com.inmap.restfulApiInMap.entity;
 import com.inmap.restfulApiInMap.classes.EstaId;
 import com.inmap.restfulApiInMap.classes.TieneAsociadoId;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,9 +24,13 @@ import lombok.NoArgsConstructor;
 public class Esta {
     @Id
     @Column(name = "id_asignacion")
+    @NotBlank(message = "El ID no puede estar vacío")
+    @NotNull(message = "El ID es obligatorio")
     private String idAsignacion;
 
     @Id
     @Column(name = "id_personal")
+    @NotBlank(message = "El ID no puede estar vacío")
+    @NotNull(message = "El ID es obligatorio")
     private String idPersonal;
 }

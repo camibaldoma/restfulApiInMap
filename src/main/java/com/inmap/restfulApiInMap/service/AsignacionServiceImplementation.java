@@ -3,6 +3,9 @@ package com.inmap.restfulApiInMap.service;
 import com.inmap.restfulApiInMap.entity.Asignacion;
 import com.inmap.restfulApiInMap.entity.Destino;
 import com.inmap.restfulApiInMap.entity.Recinto;
+import com.inmap.restfulApiInMap.error.ArgumentNotValidException;
+import com.inmap.restfulApiInMap.error.NotFoundException;
+import com.inmap.restfulApiInMap.error.OverlapException;
 import com.inmap.restfulApiInMap.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,11 +36,14 @@ public class AsignacionServiceImplementation implements AsignacionService {
     }
 
     @Override
-    public Asignacion saveAsignacion(Asignacion asignacion) {
+    public Asignacion saveAsignacion(Asignacion asignacion) throws ArgumentNotValidException, OverlapException, NotFoundException {
         // Se verifica que los componentes existan
         boolean existeMateria = materiaRepository.existsById(asignacion.getMateria().getCodMateria());
         boolean existeDestino = destinoRepository.existsById(asignacion.getDestino().getIdDestino());
         boolean existeHorario = horarioRepository.existsById(asignacion.getHorario().getIdHorario());
+        if (asignacionRepository.existsById(asignacion.getIdAsignacion())) {
+            throw new ArgumentNotValidException("El ID ya existe, no se puede usar uno duplicado");
+        }
         if (existeMateria && existeDestino && existeHorario) {
             String dia = asignacion.getHorario().getDias();
             String inicio = asignacion.getHorario().getHoraInicio();
@@ -46,27 +52,44 @@ public class AsignacionServiceImplementation implements AsignacionService {
             String idActual = asignacion.getIdAsignacion();
             String codMateria = asignacion.getMateria().getCodMateria();
             boolean estaOcupado = asignacionRepository.existsChoqueDeHorario(idDestino, dia, inicio, fin, idActual);
+            //Lo de materia se va a dejar, porque a una materia se le pueden asignar más de un espacio si la cantidad de alumnos es muy grande
             boolean materiaDuplicada = asignacionRepository.existsMateriaDuplicada(codMateria,dia,inicio,fin,idActual);
-            if (estaOcupado || materiaDuplicada) {
-                throw new RuntimeException("Error: El destino " + idDestino + " ya tiene una asignación en el horario " + inicio + " - " + fin);
+            if (estaOcupado) {
+                throw new OverlapException("El destino " + idDestino + " ya tiene una asignación en el horario " + inicio + " - " + fin);
             }
 
             // Si pasó todas las validaciones, se guarda
             return asignacionRepository.save(asignacion);
         } else {
             // Se lanza una excepción
-            throw new RuntimeException("Error: La Materia, el Destino o el Horario no existen en la base de datos.");
+            if(existeMateria == false && existeDestino == true && existeHorario == true)
+            {
+                throw new NotFoundException("La Materia no encontró en la base de datos.");
+            } else if (existeDestino == false && existeMateria == true && existeHorario == true)
+            {
+                throw new NotFoundException("El Destino no encontró en la base de datos.");
+            }
+            else if (existeHorario == false &&  existeDestino == true && existeMateria == true)
+            {
+                throw new NotFoundException("El Horario no encontró en la base de datos.");
+            }
+            else {
+                throw new NotFoundException("El Destino, la Materia o el Horario no encontraron en la base de datos.");
+            }
+
         }
     }
 
     @Override
-    public Asignacion updateAsignacion(String id, Asignacion asignacion) {
-        Asignacion asignacionToUpdate = asignacionRepository.findById(id).get();
+    public Asignacion updateAsignacion(String id, Asignacion asignacion) throws ArgumentNotValidException, NotFoundException, OverlapException {
+        Asignacion asignacionToUpdate = asignacionRepository.findById(id).orElseThrow(() -> new NotFoundException("Asignación no encontrada"));
         // Se verifica que los componentes existan
         boolean existeMateria = materiaRepository.existsById(asignacion.getMateria().getCodMateria());
         boolean existeDestino = destinoRepository.existsById(asignacion.getDestino().getIdDestino());
         boolean existeHorario = horarioRepository.existsById(asignacion.getHorario().getIdHorario());
-
+        if (asignacion.getIdAsignacion() != null && !id.equals(asignacion.getIdAsignacion())) {
+            throw new ArgumentNotValidException("No está permitido cambiar el ID de una asignación.");
+        }
         if (existeMateria && existeDestino && existeHorario)
         {
             String dia = asignacion.getHorario().getDias();
@@ -75,25 +98,27 @@ public class AsignacionServiceImplementation implements AsignacionService {
             String idDestino = asignacion.getDestino().getIdDestino();
             String codMateria = asignacion.getMateria().getCodMateria();
             boolean estaOcupado = asignacionRepository.existsChoqueDeHorario(idDestino, dia, inicio, fin, id);
+            //Lo de materia se va a dejar, porque a una materia se le pueden asignar más de un espacio si la cantidad de alumnos es muy grande
             boolean materiaDuplicada = asignacionRepository.existsMateriaDuplicada(codMateria,dia,inicio,fin,id);
-            if (estaOcupado || materiaDuplicada) {
-                throw new RuntimeException("Error: El destino " + idDestino + " ya tiene una asignación en el horario " + inicio + " - " + fin + "o la materia " + codMateria + "tiene otra asignación en ese horario");
+            if (estaOcupado) {
+                throw new OverlapException("El destino " + idDestino + " ya tiene una asignación en el horario " + inicio + " - " + fin);
             }
             else
             {
-                if(Objects.nonNull(asignacionToUpdate.getIdAsignacion()) && !"".equalsIgnoreCase(asignacionToUpdate.getIdAsignacion()))
+                if(Objects.nonNull(asignacion.getIdAsignacion()) && !"".equalsIgnoreCase(asignacion.getIdAsignacion()))
                 {
-                    asignacionToUpdate.setIdAsignacion(asignacion.getIdAsignacion());
+                    //El id de la asignación no puede actualizarse
+                    //asignacionToUpdate.setIdAsignacion(asignacion.getIdAsignacion());
                 }
-                if(Objects.nonNull(asignacionToUpdate.getDestino()))
+                if(Objects.nonNull(asignacion.getDestino()))
                 {
                     asignacionToUpdate.setDestino(asignacion.getDestino());
                 }
-                if(Objects.nonNull(asignacionToUpdate.getMateria()))
+                if(Objects.nonNull(asignacion.getMateria()))
                 {
                     asignacionToUpdate.setMateria(asignacion.getMateria());
                 }
-                if(Objects.nonNull(asignacionToUpdate.getHorario()))
+                if(Objects.nonNull(asignacion.getHorario()))
                 {
                     asignacionToUpdate.setHorario(asignacion.getHorario());
                 }
@@ -101,12 +126,27 @@ public class AsignacionServiceImplementation implements AsignacionService {
             }
         } else {
             // Se lanza una excepción
-            throw new RuntimeException("Error: La Materia, el Destino o el Horario no existen en la base de datos.");
+            if(existeMateria == false && existeDestino == true && existeHorario == true)
+            {
+                throw new NotFoundException("La Materia no encontró en la base de datos.");
+            } else if (existeDestino == false && existeMateria == true && existeHorario == true)
+            {
+                throw new NotFoundException("El Destino no encontró en la base de datos.");
+            }
+            else if (existeHorario == false &&  existeDestino == true && existeMateria == true)
+            {
+                throw new NotFoundException("El Horario no encontró en la base de datos.");
+            }
+            else {
+                throw new NotFoundException("El Destino, la Materia o el Horario no encontraron en la base de datos.");
+            }
+
         }
     }
 
     @Override
-    public void deleteAsignacion(String id) {
+    public void deleteAsignacion(String id) throws NotFoundException {
+        Asignacion asignacionToDelete = asignacionRepository.findById(id).orElseThrow(() -> new NotFoundException("Asignación no encontrada"));
         asignacionRepository.deleteById(id);
     }
 }

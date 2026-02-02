@@ -5,6 +5,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -24,9 +26,13 @@ import jakarta.persistence.Id;
 public class Tiene_asociado {
     @Id
     @Column(name = "id_personal")
+    @NotBlank(message = "El ID no puede estar vacío")
+    @NotNull(message = "El ID es obligatorio")
     private String idPersonal;
 
     @Id
     @Column(name = "id_destino")
+    @NotBlank(message = "El ID no puede estar vacío")
+    @NotNull(message = "El ID es obligatorio")
     private String idDestino;
 }

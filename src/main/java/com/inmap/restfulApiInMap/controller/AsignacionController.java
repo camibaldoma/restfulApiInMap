@@ -2,9 +2,13 @@ package com.inmap.restfulApiInMap.controller;
 
 import com.inmap.restfulApiInMap.entity.Asignacion;
 import com.inmap.restfulApiInMap.entity.Destino;
+import com.inmap.restfulApiInMap.error.ArgumentNotValidException;
+import com.inmap.restfulApiInMap.error.NotFoundException;
+import com.inmap.restfulApiInMap.error.OverlapException;
 import com.inmap.restfulApiInMap.repository.AsignacionRepository;
 import com.inmap.restfulApiInMap.repository.DestinoRepository;
 import com.inmap.restfulApiInMap.service.AsignacionService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,15 +27,15 @@ public class AsignacionController {
         return asignacionService.obtenerTodasAsignaciones(); // Esto hace el SELECT * FROM destino automáticamente
     }
     @PostMapping("/guardarAsignacion")
-    public Asignacion saveAsignacion(@RequestBody Asignacion asignacion) {
+    public Asignacion saveAsignacion(@Valid @RequestBody Asignacion asignacion) throws ArgumentNotValidException, OverlapException, NotFoundException {
         return asignacionService.saveAsignacion(asignacion);
     }
     @PutMapping("/actualizarAsignacion/{id}")
-    public Asignacion updateAsignacion(@PathVariable String id, @RequestBody Asignacion asignacion) {
+    public Asignacion updateAsignacion(@PathVariable String id, @Valid @RequestBody Asignacion asignacion) throws ArgumentNotValidException, OverlapException, NotFoundException {
         return asignacionService.updateAsignacion(id, asignacion);
     }
     @DeleteMapping("/eliminarAsignacion/{id}")
-    public void deleteAsignacion(@PathVariable String id) {
+    public void deleteAsignacion(@PathVariable String id) throws NotFoundException{
         asignacionService.deleteAsignacion(id);
     }
 }
