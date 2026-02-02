@@ -5,8 +5,10 @@ import com.inmap.restfulApiInMap.entity.Destino;
 import com.inmap.restfulApiInMap.entity.Recinto;
 import com.inmap.restfulApiInMap.error.ArgumentNotValidException;
 import com.inmap.restfulApiInMap.error.NotFoundException;
+import com.inmap.restfulApiInMap.error.OverlapException;
 import com.inmap.restfulApiInMap.repository.DestinoRepository;
 import com.inmap.restfulApiInMap.repository.RecintoRepository;
+import org.hibernate.sql.ast.tree.expression.Over;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
@@ -56,9 +58,15 @@ public class RecintoServiceImplementation implements RecintoService {
     }
 
     @Override
-    public Recinto saveRecinto(Recinto recinto) {
+    public Recinto saveRecinto(Recinto recinto) throws ArgumentNotValidException, OverlapException {
         if (recintoRepository.existsById(recinto.getIdRecinto())) {
             throw new ArgumentNotValidException("El ID ya existe, no se puede usar uno duplicado");
+        }
+        Destino destino = recinto.getDestino();
+        boolean existsDestinoInRecinto = recintoRepository.existsDestinoInRecinto(destino.getIdDestino(),recinto.getIdRecinto());
+        //Se debe verificar que si el destino ya existe, no esté asociado a ningún recinto
+        if(destinoRepository.existsById(destino.getIdDestino()) && existsDestinoInRecinto) {
+            throw new OverlapException("El Destino ya se encuentra asociado a un Recinto.");
         }
         return recintoRepository.save(recinto);
     }
@@ -68,6 +76,12 @@ public class RecintoServiceImplementation implements RecintoService {
         Recinto recintoToUpdate = recintoRepository.findById(id).orElseThrow(() -> new NotFoundException("Recinto no encontrado"));
         if (recinto.getIdRecinto() != null && !id.equals(recinto.getIdRecinto())) {
             throw new ArgumentNotValidException("No está permitido cambiar el ID de un recinto.");
+        }
+        Destino destino = recinto.getDestino();
+        boolean existsDestinoInRecinto = recintoRepository.existsDestinoInRecinto(destino.getIdDestino(),recinto.getIdRecinto());
+        //Se debe verificar que si el destino ya existe, no esté asociado a ningún recinto
+        if(destinoRepository.existsById(destino.getIdDestino()) && existsDestinoInRecinto) {
+            throw new OverlapException("El Destino ya se encuentra asociado a un Recinto.");
         }
         if (Objects.nonNull(recinto.getIdRecinto()) && !"".equalsIgnoreCase(recintoToUpdate.getIdRecinto())) {
             //El id del recinto no puede actualizarse

@@ -5,6 +5,7 @@ import com.inmap.restfulApiInMap.entity.Destino;
 import com.inmap.restfulApiInMap.entity.Recinto;
 import com.inmap.restfulApiInMap.error.ArgumentNotValidException;
 import com.inmap.restfulApiInMap.error.NotFoundException;
+import com.inmap.restfulApiInMap.error.OverlapException;
 import com.inmap.restfulApiInMap.repository.DestinoRepository;
 import com.inmap.restfulApiInMap.repository.RecintoRepository;
 import com.inmap.restfulApiInMap.service.RecintoService;
@@ -31,7 +32,7 @@ public class RecintoController {
     public List<InformacionRecinto> findInformation(@PathVariable String id, @PathVariable String hora, @PathVariable String dia ) throws NotFoundException {return recintoService.findInformation(id,hora,dia);}
 
     @PostMapping("/guardarRecinto")
-    public Recinto saveRecinto(@Valid  @RequestBody Recinto recinto) throws ArgumentNotValidException {
+    public Recinto saveRecinto(@Valid  @RequestBody Recinto recinto) throws ArgumentNotValidException, OverlapException {
         return recintoService.saveRecinto(recinto);
     }
 
