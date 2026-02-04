@@ -29,10 +29,8 @@ public interface RecintoRepository extends JpaRepository<Recinto, String> {
             "LEFT JOIN a.materia m " +
             "LEFT JOIN a.horario h ON a.horario = h " +
             "WHERE r.idRecinto = :id " +
-            "AND (" +
-            "(h.dias = :dia AND :hora BETWEEN h.horaInicio AND h.horaFin) " +
-            "OR a.idAsignacion IS NULL OR h.idHorario IS NULL" +
-            ")")
+            "AND " +
+            "h.dias = :dia AND :hora BETWEEN h.horaInicio AND h.horaFin")
     List<InformacionRecinto> findInformation(@Param("id") String id, @Param("hora") String hora, @Param("dia") String dia);
     @Query("SELECT COUNT(r) > 0 FROM Recinto r WHERE r.destino.idDestino = :idDestino AND r.idRecinto <> :idRecinto")
     boolean existsDestinoInRecinto(@Param("idDestino") String idDestino, @Param("idRecinto") String idRecinto);

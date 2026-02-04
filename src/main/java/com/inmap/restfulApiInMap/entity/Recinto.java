@@ -59,5 +59,8 @@ public class Recinto {
     @NotNull(message = "El objeto destino es obligatorio")
     private Destino destino;
 
+    @JoinColumn(name = "bloqueado")
+    private Boolean bloqueado;
+
 
 }

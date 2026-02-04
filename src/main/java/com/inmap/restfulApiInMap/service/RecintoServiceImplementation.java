@@ -37,23 +37,38 @@ public class RecintoServiceImplementation implements RecintoService {
         return recintos;
     }
     @Override
-    public List<InformacionRecinto> findInformation(String id, String hora, String dia ) throws NotFoundException {
+    public List<InformacionRecinto> findInformation(String id, String hora, String dia ) throws NotFoundException,OverlapException {
         List<InformacionRecinto> lista = recintoRepository.findInformation(id, hora, dia);
-
+        Recinto recinto = recintoRepository.findById(id).get();
         if (lista.isEmpty() || lista == null) {
             //Si no se encontró información puede ser por dos motivos:
             //1) o el id no existe
-            //2) o no hay información en ese momento del recinto porque está desocupado
+            //2) o no hay información en ese momento del recinto porque está desocupado. Puede estar desocupado porque esta bloqueado o porque no hay clases en ese momento.
             if(recintoRepository.existsById(id))
             {
-                throw new NotFoundException("No se encontró información para el recinto: " + id + ". En este momento se encuentra desocupado.");
+                if(recinto.getBloqueado()==false)
+                {
+                    throw new NotFoundException("No se encontró información para el recinto: " + id + ". En este momento se encuentra desocupado.");
+                }
+                else
+                {
+                    throw new NotFoundException("En este momento el recinto " + id + " se encuentra bloqueado. No se permite su uso para ninguna actividad.");
+                }
+
             }
             else {
                 throw new NotFoundException("No se encontró información para el recinto: " + id + " porque el id no corresponde a un recinto disponible.");
             }
 
         }
-
+        //Si se devuelve información del recinto, en teoría es porque está ocupado por una clase y, por lo tanto, no está bloqueado.
+        //Sin embargo, se verifica igualmente
+        else {
+            if(recinto.getBloqueado()==true)
+            {
+                throw new OverlapException("El recinto: " + id + " no debería tener información de ocupación, dado que se encuentra bloqueado para su uso. Es probable que la información se encuentre desactualizada.");
+            }
+        }
         return lista;
     }
 
