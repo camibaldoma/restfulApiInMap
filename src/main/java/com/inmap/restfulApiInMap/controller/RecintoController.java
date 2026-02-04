@@ -31,6 +31,11 @@ public class RecintoController {
     @GetMapping("/informacionRecintos/{id}/{hora}/{dia}")
     public List<InformacionRecinto> findInformation(@PathVariable String id, @PathVariable String hora, @PathVariable String dia ) throws NotFoundException,OverlapException {return recintoService.findInformation(id,hora,dia);}
 
+    @GetMapping("/recintosBloqueados")
+    public List<Recinto> findRecintoBlocked()
+    {
+        return recintoService.findRecintoBlocked();
+    }
     @PostMapping("/guardarRecinto")
     public Recinto saveRecinto(@Valid  @RequestBody Recinto recinto) throws ArgumentNotValidException, OverlapException {
         return recintoService.saveRecinto(recinto);
@@ -39,6 +44,11 @@ public class RecintoController {
     @PutMapping("/actualizarRecinto/{id}")
     public Recinto updateRecinto(@PathVariable String id, @Valid @RequestBody Recinto recinto) throws NotFoundException, ArgumentNotValidException{
         return recintoService.updateRecinto(id, recinto);
+    }
+
+    @PutMapping("/actualizarEstadoRecinto/{id}")
+    public Recinto updateStateRecinto(@PathVariable String id,@RequestBody Boolean state) throws NotFoundException, ArgumentNotValidException{
+        return recintoService.updateStateRecinto(id, state);
     }
 
     @DeleteMapping("/eliminarRecinto/{id}")

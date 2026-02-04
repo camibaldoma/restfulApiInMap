@@ -34,6 +34,8 @@ public interface RecintoRepository extends JpaRepository<Recinto, String> {
     List<InformacionRecinto> findInformation(@Param("id") String id, @Param("hora") String hora, @Param("dia") String dia);
     @Query("SELECT COUNT(r) > 0 FROM Recinto r WHERE r.destino.idDestino = :idDestino AND r.idRecinto <> :idRecinto")
     boolean existsDestinoInRecinto(@Param("idDestino") String idDestino, @Param("idRecinto") String idRecinto);
+    @Query("SELECT r FROM Recinto r WHERE r.bloqueado = true")
+    List<Recinto> findRecintoBlocked();
 }
 
 

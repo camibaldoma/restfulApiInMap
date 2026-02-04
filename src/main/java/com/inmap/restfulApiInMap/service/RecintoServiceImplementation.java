@@ -37,6 +37,11 @@ public class RecintoServiceImplementation implements RecintoService {
         return recintos;
     }
     @Override
+    public List<Recinto> findRecintoBlocked()
+    {
+        return recintoRepository.findRecintoBlocked();
+    }
+    @Override
     public List<InformacionRecinto> findInformation(String id, String hora, String dia ) throws NotFoundException,OverlapException {
         List<InformacionRecinto> lista = recintoRepository.findInformation(id, hora, dia);
         Recinto recinto = recintoRepository.findById(id).get();
@@ -108,11 +113,21 @@ public class RecintoServiceImplementation implements RecintoService {
         if (Objects.nonNull(recinto.getGeometria())) {
             recintoToUpdate.setGeometria(recinto.getGeometria());
         }
+        if (Objects.nonNull(recinto.getBloqueado())) {
+            recintoToUpdate.setBloqueado(recinto.getBloqueado());
+        }
         return recintoRepository.save(recintoToUpdate);
     }
     @Override
     public void deleteRecinto(String id) throws NotFoundException {
         Recinto recintoToDelete = recintoRepository.findById(id).orElseThrow(() -> new NotFoundException("Recinto no encontrado"));;
         recintoRepository.deleteById(id);
+    }
+    @Override
+    public Recinto updateStateRecinto(String id, Boolean state) throws NotFoundException,ArgumentNotValidException
+    {
+        Recinto recintoToUpdate = recintoRepository.findById(id).orElseThrow(() -> new NotFoundException("Recinto no encontrado"));
+        recintoToUpdate.setBloqueado(state);
+        return recintoRepository.save(recintoToUpdate);
     }
 }

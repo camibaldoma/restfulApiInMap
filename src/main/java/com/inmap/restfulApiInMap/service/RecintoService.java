@@ -14,7 +14,9 @@ public interface RecintoService {
     List<Recinto> obtenerTodosRecintos();
     List<Recinto> findRecinto(String id) throws NotFoundException;
     List<InformacionRecinto> findInformation(String id, String hora, String dia ) throws NotFoundException,OverlapException;
+    List<Recinto> findRecintoBlocked();
     Recinto saveRecinto(Recinto recinto) throws ArgumentNotValidException, OverlapException;
     Recinto updateRecinto(String id, Recinto recinto) throws NotFoundException,ArgumentNotValidException;
+    Recinto updateStateRecinto(String id, Boolean state) throws NotFoundException,ArgumentNotValidException;
     void deleteRecinto(String id) throws NotFoundException;
 }

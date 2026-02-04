@@ -1,6 +1,5 @@
 package com.inmap.restfulApiInMap.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.inmap.restfulApiInMap.classes.GeoJsonHelper;
 import jakarta.persistence.*;
@@ -13,28 +12,24 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.Point;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 
-//@Entity define la entidad como persistible
 @Entity
 // Esta anotación define contra que tabla de la base de datos la entidad se va a mapear
-@Table(name = "recinto")
+@Table(name = "zonas_a_bloquear")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Recinto {
+public class Zonas_a_bloquear {
     @Id
-    @Column(name = "id_recinto") // Nombre exacto de la columna PK
+    @Column(name = "id_zona") // Nombre exacto de la columna PK
     @NotBlank(message = "El ID no puede estar vacío")
     @NotNull(message = "El ID es obligatorio")
-    private String idRecinto;
+    private String idZona;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @JdbcTypeCode(org.hibernate.type.SqlTypes.GEOMETRY)
@@ -51,15 +46,7 @@ public class Recinto {
         geoJson.put("coordinates", GeoJsonHelper.convertToCoordinates(geometria));
         return geoJson;
     }
-    @OneToOne(cascade = CascadeType.ALL) //Cuando se haga recintoRepository.save(recinto),
-    // Hibernate mirará el objeto Destino que está adentro. Si el idDestino es nuevo, lo insertará automáticamente.
-    // Si ya existe, simplemente hará el vínculo.
-    @JoinColumn(name = "id_destino")
-    @Valid  //Activa la validación en cascada
-    @NotNull(message = "El objeto destino es obligatorio")
-    private Destino destino;
 
-    @Column(name = "bloqueado", nullable = false)
+    @Column(name = "bloqueado")
     private Boolean bloqueado;
-
 }
