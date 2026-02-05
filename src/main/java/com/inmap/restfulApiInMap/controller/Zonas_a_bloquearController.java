@@ -30,4 +30,9 @@ public class Zonas_a_bloquearController {
     public Zonas_a_bloquear updateStateZona(@PathVariable String id, @RequestBody Boolean state) throws NotFoundException, ArgumentNotValidException {
         return zonas_a_bloquearService.updateStateZona(id, state);
     }
+    @PutMapping("/actualizarEstadosZonas/{state}")
+    public List<Zonas_a_bloquear> updateSeveralStateZonas(@RequestBody List<String> ids, @PathVariable Boolean state) throws NotFoundException
+    {
+        return zonas_a_bloquearService.updateSeveralStateZonas(ids, state);
+    }
 }

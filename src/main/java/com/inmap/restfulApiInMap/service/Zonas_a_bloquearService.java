@@ -13,4 +13,6 @@ public interface Zonas_a_bloquearService {
     List<Zonas_a_bloquear> obtenerTodasZonas();
     List<Zonas_a_bloquear> findZonasBlocked();
     Zonas_a_bloquear updateStateZona(String id, Boolean state) throws NotFoundException, ArgumentNotValidException;
+    //Modificar el estado de varias zonas a la vez. Una multiselección
+    List<Zonas_a_bloquear> updateSeveralStateZonas(List<String> ids, Boolean state) throws NotFoundException;
 }

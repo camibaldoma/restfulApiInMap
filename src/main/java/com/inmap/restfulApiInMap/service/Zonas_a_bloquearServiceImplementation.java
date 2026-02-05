@@ -8,6 +8,7 @@ import com.inmap.restfulApiInMap.repository.Zonas_a_bloquearRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -32,5 +33,17 @@ public class Zonas_a_bloquearServiceImplementation implements Zonas_a_bloquearSe
         Zonas_a_bloquear zonaToUpdate = zonas_a_bloquearRepository.findById(id).orElseThrow(() -> new NotFoundException("Zona no encontrada"));
         zonaToUpdate.setBloqueado(state);
         return zonas_a_bloquearRepository.save(zonaToUpdate);
+    }
+
+    @Override
+    public List<Zonas_a_bloquear> updateSeveralStateZonas(List<String> ids, Boolean state) throws NotFoundException {
+        List<Zonas_a_bloquear> zonas = new ArrayList<>();
+        for(String  idZona : ids){
+            Zonas_a_bloquear zonaToUpdate = zonas_a_bloquearRepository.findById(idZona).orElseThrow(() -> new NotFoundException("Zona con id: "+idZona+" no encontrada"));
+            zonaToUpdate.setBloqueado(state);
+            zonas_a_bloquearRepository.save(zonaToUpdate);
+            zonas.add(zonaToUpdate);
+        }
+        return zonas;
     }
 }
