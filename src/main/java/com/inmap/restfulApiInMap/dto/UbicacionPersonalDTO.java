@@ -1,6 +1,8 @@
-package com.inmap.restfulApiInMap.classes;
+package com.inmap.restfulApiInMap.dto;
+
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.inmap.restfulApiInMap.classes.GeoJsonHelper;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,8 +16,7 @@ import java.util.Map;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UbicacionPersonal {
-
+public class UbicacionPersonalDTO {
     private String idDestino;
     private String idRecinto;
     private String nombreDestino;
@@ -33,6 +34,4 @@ public class UbicacionPersonal {
         geoJson.put("coordinates", GeoJsonHelper.convertToCoordinates(geometria));
         return geoJson;
     }
-
-
 }

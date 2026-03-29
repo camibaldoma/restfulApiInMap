@@ -3,7 +3,7 @@ package com.inmap.restfulApiInMap.repository;
 import com.inmap.restfulApiInMap.entity.Materia;
 
 import com.inmap.restfulApiInMap.entity.Recinto;
-import com.inmap.restfulApiInMap.interfaces.PersonalReducido;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

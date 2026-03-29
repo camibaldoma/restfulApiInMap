@@ -1,6 +1,7 @@
 package com.inmap.restfulApiInMap.repository;
 
-import com.inmap.restfulApiInMap.classes.DestinoReducido;
+
+import com.inmap.restfulApiInMap.dto.DestinoReducidoDTO;
 import com.inmap.restfulApiInMap.entity.Destino;
 import com.inmap.restfulApiInMap.entity.Recinto;
 import jakarta.persistence.EntityManager;
@@ -11,7 +12,9 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -19,8 +22,8 @@ import java.util.List;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@DataJpaTest // Solo carga lo necesario para JPA
+@ActiveProfiles("test")
 class DestinoRepositoryTest {
 
     @PersistenceContext
@@ -44,9 +47,9 @@ class DestinoRepositoryTest {
 
         entityManager.flush();
 
-        List<DestinoReducido> resultados = destinoRepository.findDestino(aula5.getIdDestino());
+        List<DestinoReducidoDTO> resultados = destinoRepository.findDestino(aula5.getIdDestino());
 
-        DestinoReducido destino = resultados.get(0);
+        DestinoReducidoDTO destino = resultados.get(0);
 
         assertThat(destino.getNombreDestino()).isEqualTo("Aula 5");
         assertThat(destino.getGeometria()).isNotNull();

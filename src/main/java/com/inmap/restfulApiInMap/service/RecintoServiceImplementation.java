@@ -1,6 +1,7 @@
 package com.inmap.restfulApiInMap.service;
 
-import com.inmap.restfulApiInMap.classes.InformacionRecinto;
+
+import com.inmap.restfulApiInMap.dto.InformacionRecintoDTO;
 import com.inmap.restfulApiInMap.entity.Destino;
 import com.inmap.restfulApiInMap.entity.Recinto;
 import com.inmap.restfulApiInMap.error.ArgumentNotValidException;
@@ -42,29 +43,22 @@ public class RecintoServiceImplementation implements RecintoService {
         return recintoRepository.findRecintoBlocked();
     }
     @Override
-    public List<InformacionRecinto> findInformation(String id, String hora, String dia ) throws NotFoundException,OverlapException {
-        List<InformacionRecinto> lista = recintoRepository.findInformation(id, hora, dia);
-        Recinto recinto = recintoRepository.findById(id).get();
-        if (lista.isEmpty() || lista == null) {
+    public List<InformacionRecintoDTO> findInformation(String id, String hora, String dia ) throws NotFoundException,OverlapException {
+        List<InformacionRecintoDTO> lista = recintoRepository.findInformation(id, hora, dia);
+        Recinto recinto = recintoRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Recinto no encontrado"));
+        if (lista.isEmpty() || lista == null)
+        {
             //Si no se encontró información puede ser por dos motivos:
-            //1) o el id no existe
-            //2) o no hay información en ese momento del recinto porque está desocupado. Puede estar desocupado porque esta bloqueado o porque no hay clases en ese momento.
-            if(recintoRepository.existsById(id))
+            //No hay información en ese momento del recinto porque está desocupado. Puede estar desocupado porque esta bloqueado o porque no hay clases en ese momento.
+            if(recinto.getBloqueado()==false)
             {
-                if(recinto.getBloqueado()==false)
-                {
-                    throw new NotFoundException("No se encontró información para el recinto: " + id + ". En este momento se encuentra desocupado.");
-                }
-                else
-                {
-                    throw new NotFoundException("En este momento el recinto " + id + " se encuentra bloqueado. No se permite su uso para ninguna actividad.");
-                }
-
+                throw new NotFoundException("No se encontró información para el recinto: " + id + ". En este momento se encuentra desocupado.");
             }
-            else {
-                throw new NotFoundException("No se encontró información para el recinto: " + id + " porque el id no corresponde a un recinto disponible.");
+            else
+            {
+                throw new NotFoundException("En este momento el recinto " + id + " se encuentra bloqueado. No se permite su uso para ninguna actividad.");
             }
-
         }
         //Si se devuelve información del recinto, en teoría es porque está ocupado por una clase y, por lo tanto, no está bloqueado.
         //Sin embargo, se verifica igualmente

@@ -1,7 +1,8 @@
 package com.inmap.restfulApiInMap.repository;
 
+import com.inmap.restfulApiInMap.dto.PersonalReducidoDTO;
 import com.inmap.restfulApiInMap.entity.*;
-import com.inmap.restfulApiInMap.interfaces.PersonalReducido;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,7 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 
@@ -18,8 +21,8 @@ import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-@SpringBootTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@DataJpaTest // Solo carga lo necesario para JPA
+@ActiveProfiles("test")
 class PersonalRepositoryTest {
 
     @PersistenceContext
@@ -29,44 +32,25 @@ class PersonalRepositoryTest {
     private PersonalRepository personalRepository;
 
     private GeometryFactory geometryFactory = new GeometryFactory();
-
+    private Personal docenteTest1;
+    private Personal docenteTest2;
     @BeforeEach
     void setUp() {
-    }
+        this.docenteTest1 = new Personal();
+        this.docenteTest1.setIdPersonal("999");
+        this.docenteTest1.setDni("123456789");
+        this.docenteTest1.setCargoLaboral("Laboral_A");
+        this.docenteTest1.setNombrePersonal("Zulema");
+        this.docenteTest1.setApellidoPersonal("AAA_Prueba");
+        entityManager.persist(docenteTest1);
 
-    @Test
-    @Transactional
-    void findAllOrderByApellido() {
-        // Se crea un docente con un apellido que empiece con "AAA"
-        // para forzarlo a estar en los primeros lugares.
-        Personal docenteTest = new Personal();
-        docenteTest.setIdPersonal("999");
-        docenteTest.setNombrePersonal("Zulema");
-        docenteTest.setApellidoPersonal("AAA_Prueba");
-        entityManager.persist(docenteTest);
-
-        entityManager.flush();
-
-        // Se ejecuta la consulta
-        List<PersonalReducido> resultados = personalRepository.findAllOrderByApellido();
-
-        // VERIFICACIÓN
-        // Se busca si el docente de prueba
-        // está en una posición menor (más arriba) que uno con Z.
-        boolean estaOrdenado = false;
-        for (int i = 0; i < resultados.size() - 1; i++) {
-            String actual = resultados.get(i).getNombreCompleto();
-            if (actual.contains("AAA_Prueba")) {
-                estaOrdenado = true; // Se encontró al principio o cerca
-                break;
-            }
-        }
-        assertTrue(estaOrdenado, "El personal de prueba debería aparecer en los primeros resultados");
-    }
-
-    @Test
-    @Transactional
-    void findUbicacionCompletaNative() {
+        this.docenteTest2 = new Personal();
+        this.docenteTest2.setIdPersonal("998");
+        this.docenteTest2.setDni("023456789");
+        this.docenteTest2.setCargoLaboral("Laboral_B");
+        this.docenteTest2.setNombrePersonal("Juana");
+        this.docenteTest2.setApellidoPersonal("BBB_Prueba");
+        entityManager.persist(docenteTest2);
 
         // Se crea un Destino (el punto en el mapa)
         Point puntoAula = geometryFactory.createPoint(new Coordinate(-38.0, -57.5));
@@ -91,15 +75,9 @@ class PersonalRepositoryTest {
         Recinto recinto1 = new Recinto();
         recinto1.setIdRecinto("R50");
         recinto1.setDestino(aula5);
+        recinto1.setBloqueado(false);
         recinto1.setGeometria(recintoMultiPoligono);
         entityManager.persist(recinto1);
-
-        // Se crea al Personal
-        Personal docente = new Personal();
-        docente.setIdPersonal("80");
-        docente.setNombrePersonal("Cami");
-        docente.setApellidoPersonal("Baldomá");
-        entityManager.persist(docente);
 
         // Se crea el Horario (Lunes de 08:00 a 10:00)
         Horario horarioLunes = new Horario();
@@ -125,24 +103,37 @@ class PersonalRepositoryTest {
 
         //Se crea Esta
         Esta esta = new Esta();
-        esta.setIdPersonal(docente.getIdPersonal());
+        esta.setIdPersonal(docenteTest1.getIdPersonal());
         esta.setIdAsignacion(asignacion.getIdAsignacion());
         entityManager.persist(esta);
 
+        entityManager.flush();
+    }
 
+    @Test
+    @Transactional
+    void findAllOrderByApellido() {
+        //Act
+        List<PersonalReducidoDTO> resultados = personalRepository.findAllOrderByApellido();
+        //Assert
+        assertThat(resultados).isNotNull();
+        String nombreRecibido1 = resultados.get(0).getNombreCompleto();
+        String nombreRecibido2 = resultados.get(1).getNombreCompleto();
+        assertThat(nombreRecibido1).isEqualTo("Zulema AAA_Prueba");
+        assertThat(nombreRecibido2).isEqualTo("Juana BBB_Prueba");
+    }
 
-        entityManager.flush(); // Sincroniza con la DB
+    @Test
+    @Transactional
+    void findUbicacionCompletaNative() {
 
         // Se prueba buscar a las 09:00 (en medio de la clase)
         String horaConsulta = "09:00:00";
         String diaConsulta = "Lunes";
 
-        List<Object[]> resultados = personalRepository.findUbicacionCompletaNative(docente.getIdPersonal(), diaConsulta, horaConsulta);
-
-        //VERIFICACIÓN (Aseverar) ---
+        List<Object[]> resultados = personalRepository.findUbicacionCompletaNative(docenteTest1.getIdPersonal(), diaConsulta, horaConsulta);
 
         Object[] fila = resultados.get(0);
-
 
         // Se verifican las columnas según el orden del mapeo en el Service:
         assertThat(fila[0]).isEqualTo("D50");

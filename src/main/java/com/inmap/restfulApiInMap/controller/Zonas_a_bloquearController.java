@@ -12,6 +12,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@CrossOrigin(
+        originPatterns = "*",
+        allowCredentials = "true",
+        methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS},
+        allowedHeaders = "*"
+)
 public class Zonas_a_bloquearController {
     @Autowired
     private Zonas_a_bloquearService zonas_a_bloquearService;
@@ -24,6 +30,10 @@ public class Zonas_a_bloquearController {
     @GetMapping("/obtenerZonasBloqueadas")
     public List<Zonas_a_bloquear> findZonasBlocked(){
         return zonas_a_bloquearService.findZonasBlocked();
+    }
+    @GetMapping("/obtenerZonasNoBloqueadas")
+    public List<Zonas_a_bloquear> findZonasNoBlocked(){
+        return zonas_a_bloquearService.findZonasNoBlocked();
     }
 
     @PutMapping("/actualizarEstadoZona/{id}")

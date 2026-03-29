@@ -1,9 +1,10 @@
 package com.inmap.restfulApiInMap.service;
 
 import com.inmap.restfulApiInMap.entity.*;
-import com.inmap.restfulApiInMap.interfaces.PersonalReducido;
+import com.inmap.restfulApiInMap.error.ArgumentNotValidException;
+import com.inmap.restfulApiInMap.error.NotFoundException;
+
 import com.inmap.restfulApiInMap.repository.MateriaRepository;
-import org.geolatte.geom.jts.JTS;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.*;
@@ -12,11 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 class MateriaServiceTest {
@@ -28,7 +32,8 @@ class MateriaServiceTest {
     MateriaRepository materiaRepository;
 
     private GeometryFactory geometryFactory = new GeometryFactory();
-
+    private Materia materia;
+    private Materia materiaTest;
     @BeforeEach
     void setUp() {
 
@@ -71,9 +76,9 @@ class MateriaServiceTest {
 
 
         // Se crea la Materia
-        Materia materia = new Materia();
-        materia.setCodMateria("M1T");
-        materia.setNombreMateria("Sistemas Operativos");
+        this.materia = new Materia();
+        this.materia.setCodMateria("M1T");
+        this.materia.setNombreMateria("Sistemas Operativos");
 
 
         // Se crea la Asignación
@@ -92,23 +97,131 @@ class MateriaServiceTest {
         // Se prueba buscar a las 09:00 (en medio de la clase)
         String horaConsulta = "09:00:00";
         String diaConsulta = "Lunes";
+        String idInexistente = "M9F";
+        String idExistente = "M9P";
 
-        Mockito.when(materiaRepository.findMateria(
-                materia.getCodMateria(), // En lugar de docenteTest.getIdPersonal()
-                horaConsulta, // En lugar de diaConsulta
-                diaConsulta  // En lugar de horaConsulta
-        )).thenReturn(List.of(recinto1));
+        this.materiaTest = new Materia();
+        this.materiaTest.setCodMateria(idExistente);
+        this.materiaTest.setNombreMateria("Materia test");
 
+        Mockito.when(materiaRepository.findMateria(materia.getCodMateria(),horaConsulta,diaConsulta)).thenReturn(List.of(recinto1));
+        Mockito.when(materiaRepository.findMateria(idExistente,horaConsulta,diaConsulta)).thenReturn(null);
+        Mockito.when(materiaRepository.findMateria(eq(idInexistente),anyString(),anyString())).thenReturn(null);
+        Mockito.when(materiaRepository.existsById(idExistente)).thenReturn(true);
+        Mockito.when(materiaRepository.existsById(idInexistente)).thenReturn(false);
+        Mockito.when(materiaRepository.save(any(Materia.class))).thenAnswer(returnsFirstArg());
+        Mockito.when(materiaRepository.existsById(idExistente)).thenReturn(true);
+        Mockito.when(materiaRepository.findById(materia.getCodMateria())).thenReturn(Optional.of(materia));
+        Mockito.when(materiaRepository.findById(idInexistente)).thenReturn(Optional.empty());
+        Mockito.when(materiaRepository.findById(idExistente)).thenReturn(Optional.of(materiaTest));
     }
+    //Se testea que la materia SI se encuentre
     @Test
-    void findMateria() {
+    void findMateriaSI() {
+        //Arrange
         String id = "M1T";
         String horaConsulta = "09:00:00";
         String diaConsulta = "Lunes";
+        //Act
         List<Recinto> resultados = materiaService.findMateria(id, horaConsulta, diaConsulta);
+        //Assert
         Recinto resultado = resultados.get(0);
         assertNotNull(resultados);
         assertFalse(resultados.isEmpty(), "La lista no debería estar vacía");
         assertEquals(resultado.getIdRecinto(), "R50");
+        assertEquals(resultado.getDestino().getNombreDestino(), "Aula 5");
     }
+    //Se testea que la materia NO se encuentre. Lanzamiento de NotFoundException porque el id no existe
+    @Test
+    void findMateriaNO() {
+        //Arrange
+        String idInexistente = "M9F";
+        String horaConsulta = "09:00:00";
+        String diaConsulta = "Lunes";
+        //Act y Assert
+        assertThrows(NotFoundException.class, () -> {
+            materiaService.findMateria(idInexistente, horaConsulta, diaConsulta);
+        });
+    }
+    //Se testea que la materia NO se encuentre. Lanzamiento de NotFoundException porque la materia no se está dictando en ese momento
+    @Test
+    void findMateriaNO_1() {
+        //Arrange
+        String idExistente = "M9P";
+        String horaConsulta = "09:00:00";
+        String diaConsulta = "Lunes";
+        //Act y Assert
+        assertThrows(NotFoundException.class, () -> {
+            materiaService.findMateria(idExistente, horaConsulta, diaConsulta);
+        });
+    }
+    //Se testea que la materia SI se guarde
+    @Test
+    void saveMateriaSI() throws Exception {
+        //Arrange
+        //Act
+        Materia save = materiaService.saveMateria(materia);
+        //Assert
+        assertNotNull(save,"El objeto guardado no debería ser nulo.");
+        assertEquals("M1T", save.getCodMateria());
+        assertEquals("Sistemas Operativos", save.getNombreMateria());
+    }
+    //Se testea que la materia NO se guarde. Lanzamiento de ArgumentNotValidException
+    @Test
+    void saveMateriaNO() throws Exception {
+        //Arrange
+        String idExistente = "M9P";
+
+        //Act y Assert
+        assertThrows(ArgumentNotValidException.class, () -> {
+            materiaService.saveMateria(materiaTest);
+        });
+    }
+    //Se testea que la materia SI se actualice
+    @Test
+    void updateMateriaSI() throws Exception {
+        //Arrange
+        String cod = "M1T";
+        Materia materiaTest = new Materia();
+        materiaTest .setCodMateria(cod);
+        materiaTest .setNombreMateria("Materia test");
+        //Act
+        Materia update = materiaService.updateMateria(cod,materiaTest);
+        //Assert
+        assertNotNull(update,"El objeto actualizado no debería ser nulo.");
+        assertEquals("M1T", update.getCodMateria());
+        assertEquals("Materia test", update.getNombreMateria());
+    }
+    //Se testea que la materia NO se actualice. Lanzamiento de NotFoundException
+    @Test
+    void updateMateriaNO() throws Exception {
+        //Arrange
+        String idInexistente = "M9F";
+        //Act y Assert
+            assertThrows(NotFoundException.class, () -> {
+            materiaService.updateMateria(idInexistente,materia);
+        });
+
+    }
+    //Se testea que la materia NO se actualice. Lanzamiento de ArgumentNotValidException
+    @Test
+    void updateMateriaNO_1() throws Exception {
+        //Arrange
+        String idExistente = "M9P";
+        //Act y Assert
+        assertThrows(ArgumentNotValidException.class, () -> {
+            materiaService.updateMateria(idExistente,materia);
+        });
+    }
+    //Se testea que la materia SI se elimine.
+    @Test
+    void deleteMateriaSI() throws Exception, NotFoundException {
+        //Arrange
+        String id = "M1T";
+        //Act
+        materiaService.deleteMateria(id);
+        // Assert. Se verifica que el metodo deleteById del repo se ejecutó 1 vez
+        verify(materiaRepository, times(1)).deleteById(id);
+    }
+
 }

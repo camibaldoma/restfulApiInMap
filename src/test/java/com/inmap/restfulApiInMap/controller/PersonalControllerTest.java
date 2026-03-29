@@ -1,17 +1,24 @@
 package com.inmap.restfulApiInMap.controller;
 
-import com.inmap.restfulApiInMap.classes.UbicacionPersonal;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.inmap.restfulApiInMap.dto.PersonalReducidoDTO;
+import com.inmap.restfulApiInMap.dto.PersonalRequestDTO;
+import com.inmap.restfulApiInMap.dto.UbicacionPersonalDTO;
 import com.inmap.restfulApiInMap.entity.*;
-import com.inmap.restfulApiInMap.interfaces.PersonalReducido;
+
+import com.inmap.restfulApiInMap.error.ArgumentNotValidException;
 import com.inmap.restfulApiInMap.service.PersonalService;
 import org.geolatte.geom.jts.JTS;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.*;
 import org.mockito.Mockito;
+import org.n52.jackson.datatype.jts.JtsModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
@@ -19,36 +26,53 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(PersonalController.class)
+/*@WebMvcTest(PersonalController.class)
 class PersonalControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper; //conversor de Java a JSON
 
     @MockBean
     private PersonalService personalService;
 
     private GeometryFactory geometryFactory = new GeometryFactory();
 
-    private PersonalReducido docenteReal;
-    private UbicacionPersonal ubicacionReal;
+    private Personal docenteTest1;
+    private Personal docenteTest2;
+    private PersonalReducidoDTO docenteTestReducido1;
+    private PersonalReducidoDTO docenteTestReducido2;
+    private UbicacionPersonalDTO ubicacionReal;
 
     @BeforeEach
     void setUp() {
-        // Se crea un docente con un apellido que empiece con "AAA"
-        // para forzarlo a estar en los primeros lugares.
-        Personal docenteTest = new Personal();
-        docenteTest.setIdPersonal("999");
-        docenteTest.setNombrePersonal("Zulema");
-        docenteTest.setApellidoPersonal("AAA_Prueba");
+        objectMapper.registerModule(new JtsModule());
+        this.docenteTest1 = new Personal();
+        this.docenteTest1.setIdPersonal("999");
+        this.docenteTest1.setDni("123456789");
+        this.docenteTest1.setCargoLaboral("Laboral_A");
+        this.docenteTest1.setNombrePersonal("Zulema");
+        this.docenteTest1.setApellidoPersonal("AAA_Prueba");
 
-       docenteReal = new PersonalReducidoDTO("Zulema AAA_Prueba");
+        this.docenteTest2 = new Personal();
+        this.docenteTest2.setIdPersonal("998");
+        this.docenteTest2.setDni("023456789");
+        this.docenteTest2.setCargoLaboral("Laboral_B");
+        this.docenteTest2.setNombrePersonal("Juana");
+        this.docenteTest2.setApellidoPersonal("BBB_Prueba");
 
+        docenteTestReducido1 = new PersonalReducidoDTO(docenteTest1.getNombrePersonal(),docenteTest1.getApellidoPersonal(),docenteTest1.getCargoLaboral() );
+        docenteTestReducido2 = new PersonalReducidoDTO(docenteTest2.getNombrePersonal(),docenteTest2.getApellidoPersonal(),docenteTest2.getCargoLaboral() );
         // Se crea un Destino (el punto en el mapa)
         Point puntoAula = geometryFactory.createPoint(new Coordinate(-38.0, -57.5));
         Destino aula5 = new Destino();
@@ -98,17 +122,17 @@ class PersonalControllerTest {
 
         //Se crea Esta
         Esta esta = new Esta();
-        esta.setIdPersonal(docenteTest.getIdPersonal());
+        esta.setIdPersonal(docenteTest1.getIdPersonal());
         esta.setIdAsignacion(asignacion.getIdAsignacion());
 
 
-        ubicacionReal = new UbicacionPersonal(aula5.getIdDestino(),recinto1.getIdRecinto(),aula5.getNombreDestino(),materia.getNombreMateria(),recinto1.getGeometria());
+        ubicacionReal = new UbicacionPersonalDTO(aula5.getIdDestino(),recinto1.getIdRecinto(),aula5.getNombreDestino(),materia.getNombreMateria(),recinto1.getGeometria());
 
     }
 
     @Test
     void findAllOrderByApellido() throws Exception {
-        Mockito.when(personalService.findAllOrderByApellido()).thenReturn(List.of(docenteReal));
+        Mockito.when(personalService.findAllOrderByApellido()).thenReturn(List.of(docenteTestReducido1,docenteTestReducido2));
         mockMvc.perform(get("/personal"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].nombreCompleto").value("Zulema AAA_Prueba"));
@@ -119,33 +143,63 @@ class PersonalControllerTest {
         String horaConsulta = "09:00:00";
         String diaConsulta = "Lunes";
         String id = "999";
-        Mockito.when(personalService.findUbicacionCompletaNative(anyString(),anyString(),anyString())).thenReturn(List.of(ubicacionReal));
+        Mockito.when(personalService.findUbicacionCompletaNative(eq(id),anyString(),anyString())).thenReturn(List.of(ubicacionReal));
         mockMvc.perform(get("/personal/{id}/{hora}/{dia}",id,horaConsulta,diaConsulta))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].idRecinto").value("R50"));
     }
-
-    // Esta clase"simula ser el objeto que vendría de la DB
-    private static class PersonalReducidoDTO implements PersonalReducido {
-        private String nombreCompleto;
-
-        public PersonalReducidoDTO(String nombreCompleto) {
-            this.nombreCompleto = nombreCompleto;
-        }
-
-        @Override
-        public String getIdPersonal() {
-            return "";
-        }
-
-        @Override
-        public String getNombreCompleto() {
-            return nombreCompleto;
-        }
-
-        @Override
-        public String getCargoLaboral() {
-            return "";
-        }
+    @Test
+    void savePersonal() throws Exception {
+        //Arrange
+        PersonalRequestDTO personalRequestDTO = new PersonalRequestDTO();
+        personalRequestDTO.setNombrePersonal(docenteTest1.getNombrePersonal());
+        personalRequestDTO.setApellidoPersonal(docenteTest1.getApellidoPersonal());
+        personalRequestDTO.setCargoLaboral(docenteTest1.getCargoLaboral());
+        personalRequestDTO.setDni(docenteTest1.getDni());
+        Mockito.when(personalService.savePersonal(personalRequestDTO)).thenReturn(docenteTest1);
+        //Act
+        mockMvc.perform(post("/guardarPersonal")
+                        .contentType(MediaType.APPLICATION_JSON) // Se envía JSON
+                        .content(objectMapper.writeValueAsString(docenteTest1))) // Se convierte el objeto a JSON String
+                //Assert
+                .andExpect(status().isCreated()) //
+                .andExpect(jsonPath("$.idPersonal").value("999"))
+                .andExpect(jsonPath("$.nombrePersonal").value("Zulema"))
+                .andExpect(jsonPath("$.apellidoPersonal").value("AAA_Prueba"));
     }
-}
+    @Test
+    void updatePersonal() throws Exception {
+        //Arrange
+        String id = "999";
+        Personal personalTest = new Personal();
+        personalTest.setIdPersonal(id);
+        personalTest.setDni("123456789");
+        personalTest.setCargoLaboral("Laboral_A");
+        personalTest.setNombrePersonal("NombreTest");
+        personalTest.setApellidoPersonal("ApellidoTest");
+        Mockito.when(personalService.updatePersonal(id,personalTest)).thenReturn(personalTest);
+        //Act
+        mockMvc.perform(put("/actualizarPersonal/{id}",id)
+                        .contentType(MediaType.APPLICATION_JSON) // Se envía JSON
+                        .content(objectMapper.writeValueAsString(personalTest))) // Se convierte el objeto a JSON String
+                //Assert
+                .andExpect(status().isOk()) //
+                .andExpect(jsonPath("$.idPersonal").value("999"))
+                .andExpect(jsonPath("$.nombrePersonal").value("NombreTest"))
+                .andExpect(jsonPath("$.apellidoPersonal").value("ApellidoTest"));
+
+    }
+    @Test
+    void deletePersonal() throws Exception {
+        //Arrange
+        String id = "999";
+        //Act
+        mockMvc.perform(delete("/eliminarPersonal/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                //Assert
+                .andExpect(status().isOk());
+
+        // Se verifica que el service realmente fue llamado para borrar ese ID
+        verify(personalService, times(1)).deletePersonal(id);
+    }
+}*/

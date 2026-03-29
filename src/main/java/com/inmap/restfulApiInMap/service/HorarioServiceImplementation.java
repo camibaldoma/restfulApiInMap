@@ -1,5 +1,6 @@
 package com.inmap.restfulApiInMap.service;
 
+import com.inmap.restfulApiInMap.dto.HorarioRequestDTO;
 import com.inmap.restfulApiInMap.entity.Horario;
 import com.inmap.restfulApiInMap.entity.Materia;
 import com.inmap.restfulApiInMap.error.ArgumentNotValidException;
@@ -22,22 +23,32 @@ public class HorarioServiceImplementation implements HorarioService {
     }
 
     @Override
-    public Horario saveHorario(Horario horario) {
-        if (horarioRepository.existsById(horario.getIdHorario())) {
-            throw new ArgumentNotValidException("El ID ya existe, no se puede usar uno duplicado");
+    public Horario saveHorario(HorarioRequestDTO horario) {
+        //Verificar duplicado lógico de franja horaria
+        if (horarioRepository.existsByHoraInicioAndHoraFinAndDias(horario.getHoraInicio(), horario.getHoraFin(), horario.getDias())) {
+            throw new ArgumentNotValidException("Ya existe un horario registrado en esa franja horaria y día.");
         }
-        return horarioRepository.save(horario);
+        String ultimoId = horarioRepository.findLastId();
+        String nuevoId;
+        if (ultimoId == null) {
+            nuevoId = "H1";
+        } else {
+            // se extrae el número después de la 'H'
+            int numeroSiguiente = Integer.parseInt(ultimoId.substring(1)) + 1;
+            nuevoId = "H" + numeroSiguiente;
+        }
+        Horario horario2 = new Horario();
+        horario2.setHoraInicio(horario.getHoraInicio());
+        horario2.setHoraFin(horario.getHoraFin());
+        horario2.setDias(horario.getDias());
+        horario2.setIdHorario(nuevoId);
+        return horarioRepository.save(horario2);
     }
 
     @Override
-    public Horario updateHorario(String id, Horario horario) {
+    public Horario updateHorario(String id, HorarioRequestDTO horario) {
         Horario horarioToUpdate = horarioRepository.findById(id).orElseThrow(() -> new NotFoundException("Horario no encontrado"));
-        if (horario.getIdHorario() != null && !id.equals(horario.getIdHorario())) {
-            throw new ArgumentNotValidException("No está permitido cambiar el ID de un horario.");
-        }
-        if(Objects.nonNull(horario.getIdHorario()) && !"".equalsIgnoreCase(horario.getIdHorario())){
-            horarioToUpdate.setIdHorario(horario.getIdHorario());
-        }
+
         if(Objects.nonNull(horario.getDias()) && !"".equalsIgnoreCase(horario.getDias())){
             horarioToUpdate.setDias(horario.getDias());
         }

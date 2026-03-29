@@ -1,6 +1,7 @@
 package com.inmap.restfulApiInMap.service;
 
-import com.inmap.restfulApiInMap.classes.DestinoReducido;
+
+import com.inmap.restfulApiInMap.dto.DestinoReducidoDTO;
 import com.inmap.restfulApiInMap.entity.Destino;
 import com.inmap.restfulApiInMap.error.ArgumentNotValidException;
 import com.inmap.restfulApiInMap.error.NotFoundException;
@@ -20,8 +21,8 @@ public class DestinoServiceImplementation implements DestinoService {
         return destinoRepository.findAll();
     }
     @Override
-    public List<DestinoReducido> findDestino(String id_destino)  throws NotFoundException {
-        List<DestinoReducido> destinos = destinoRepository.findDestino(id_destino);
+    public List<DestinoReducidoDTO> findDestino(String id_destino)  throws NotFoundException {
+        List<DestinoReducidoDTO> destinos = destinoRepository.findDestino(id_destino);
         if(destinos == null || destinos.isEmpty())
         {
             throw new NotFoundException("Destino no encontrado");

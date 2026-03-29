@@ -15,23 +15,19 @@ public interface AsignacionRepository extends JpaRepository<Asignacion, String> 
     @Query("SELECT COUNT(a) > 0 FROM Asignacion a " +
             "WHERE a.destino.idDestino = :idDestino " +
             "AND a.horario.dias = :dia " +
-            "AND a.idAsignacion <> :idActual " +
             "AND NOT (a.horario.horaFin <= :inicio OR a.horario.horaInicio >= :fin)")
     boolean existsChoqueDeHorario(@Param("idDestino") String idDestino,
                                   @Param("dia") String dia,
                                   @Param("inicio") String inicio,
-                                  @Param("fin") String fin,
-                                  @Param("idActual") String idActual);
+                                  @Param("fin") String fin);
     @Query("SELECT COUNT(a) > 0 FROM Asignacion a " +
             "WHERE a.materia.codMateria = :cod_materia " +
             "AND a.horario.dias = :dia " +
-            "AND a.idAsignacion <> :idActual " +
             "AND NOT (a.horario.horaFin <= :inicio OR a.horario.horaInicio >= :fin)")
     boolean existsMateriaDuplicada(@Param("cod_materia") String cod_materia,
                                   @Param("dia") String dia,
                                   @Param("inicio") String inicio,
-                                  @Param("fin") String fin,
-                                  @Param("idActual") String idActual);
+                                  @Param("fin") String fin);
     @Query("SELECT COUNT(a) > 0 FROM Asignacion a JOIN Esta e ON a.idAsignacion = e.idAsignacion " +
             "WHERE e.idPersonal = :idPersonal " +
             "AND a.horario.dias = :dia " +
@@ -40,4 +36,6 @@ public interface AsignacionRepository extends JpaRepository<Asignacion, String> 
                                         @Param("dia") String dia,
                                         @Param("inicio") String inicio,
                                         @Param("fin") String fin);
+    @Query("SELECT a.idAsignacion FROM Asignacion a WHERE a.idAsignacion LIKE 'A%' ORDER BY CAST(SUBSTRING(a.idAsignacion, 2) AS int) DESC LIMIT 1")
+    String findLastId();
 }

@@ -1,8 +1,8 @@
 package com.inmap.restfulApiInMap.repository;
 
-import com.inmap.restfulApiInMap.classes.UbicacionPersonal;
+import com.inmap.restfulApiInMap.dto.PersonalReducidoDTO;
 import com.inmap.restfulApiInMap.entity.Personal;
-import com.inmap.restfulApiInMap.interfaces.PersonalReducido;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,12 +15,9 @@ import java.util.List;
 public interface PersonalRepository extends JpaRepository<Personal, String> {
     //@Query: Define una consulta JPQL personalizada o SQL nativa para una entidad.
     //Consultas nativas de SQL
-    @Query(value = "SELECT p.id_personal AS idPersonal, " +
-            "(p.nombre_personal || ' ' || p.apellido_personal) AS nombreCompleto, " +
-            "p.cargo_laboral AS cargoLaboral " +
-            "FROM personal p ORDER BY p.apellido_personal ASC",
-            nativeQuery = true)
-    List<PersonalReducido> findAllOrderByApellido();
+    @Query("SELECT NEW com.inmap.restfulApiInMap.dto.PersonalReducidoDTO(p.nombrePersonal, p.apellidoPersonal,p.cargoLaboral) " +
+            "FROM Personal p ORDER BY p.apellidoPersonal")
+    List<PersonalReducidoDTO> findAllOrderByApellido();
 
     //No se puede usar JPQL por la UNION
     @Query(value = "SELECT d.id_destino AS idDestino, r.id_recinto AS idRecinto, " +
@@ -48,7 +45,9 @@ public interface PersonalRepository extends JpaRepository<Personal, String> {
     List<Object[]> findUbicacionCompletaNative(@Param("id") String id,
                                                @Param("dia") String dia,
                                                @Param("hora") String hora);
-
+    @Query("SELECT MAX(CAST(p.idPersonal AS int)) FROM Personal p")
+    Integer findMaxId();
+    Boolean existsByDni(String Dni);
 }
 
 

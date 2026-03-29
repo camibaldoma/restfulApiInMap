@@ -1,6 +1,7 @@
 package com.inmap.restfulApiInMap.repository;
 
-import com.inmap.restfulApiInMap.classes.DestinoReducido;
+
+import com.inmap.restfulApiInMap.dto.DestinoReducidoDTO;
 import com.inmap.restfulApiInMap.entity.Destino;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,8 +16,8 @@ public interface DestinoRepository extends JpaRepository<Destino, String> {
     //@Query: Define una consulta JPQL personalizada o SQL nativa para una entidad.
 
     //JPQL
-    @Query("SELECT new com.inmap.restfulApiInMap.classes.DestinoReducido( d.nombreDestino, d.geometria) " +
+    @Query("SELECT new com.inmap.restfulApiInMap.dto.DestinoReducidoDTO( d.nombreDestino, d.geometria) " +
             "FROM Destino d WHERE d.idDestino = :id")
-    List<DestinoReducido> findDestino(@Param("id") String id);
+    List<DestinoReducidoDTO> findDestino(@Param("id") String id);
 
 }

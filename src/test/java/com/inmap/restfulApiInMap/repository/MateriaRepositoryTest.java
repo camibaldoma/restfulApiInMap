@@ -8,7 +8,9 @@ import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -16,8 +18,8 @@ import java.util.List;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@DataJpaTest // Solo carga lo necesario para JPA
+@ActiveProfiles("test")
 class MateriaRepositoryTest {
 
     @PersistenceContext
@@ -58,6 +60,7 @@ class MateriaRepositoryTest {
         Recinto recinto1 = new Recinto();
         recinto1.setIdRecinto("R50");
         recinto1.setDestino(aula5);
+        recinto1.setBloqueado(false);
         recinto1.setGeometria(recintoMultiPoligono);
         entityManager.persist(recinto1);
 
@@ -66,6 +69,8 @@ class MateriaRepositoryTest {
         docente.setIdPersonal("80");
         docente.setNombrePersonal("Cami");
         docente.setApellidoPersonal("Baldomá");
+        docente.setDni("123456789");
+        docente.setCargoLaboral("Laboral");
         entityManager.persist(docente);
 
         // Se crea el Horario (Lunes de 08:00 a 10:00)

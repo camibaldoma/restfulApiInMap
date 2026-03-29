@@ -49,4 +49,7 @@ public class Zonas_a_bloquear {
 
     @Column(name = "bloqueado")
     private Boolean bloqueado;
+
+    @Column(name = "bloqueo_permanente")
+    private Boolean bloqueo_permanente;
 }

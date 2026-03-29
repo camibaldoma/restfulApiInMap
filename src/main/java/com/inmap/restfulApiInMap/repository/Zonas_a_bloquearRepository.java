@@ -12,4 +12,6 @@ import java.util.List;
 public interface Zonas_a_bloquearRepository extends JpaRepository<Zonas_a_bloquear, String> {
     @Query("SELECT z FROM Zonas_a_bloquear z WHERE z.bloqueado = true")
     List<Zonas_a_bloquear> findZonasBlocked();
+    @Query("SELECT z FROM Zonas_a_bloquear z WHERE z.bloqueado = false")
+    List<Zonas_a_bloquear> findZonasNoBlocked();
 }

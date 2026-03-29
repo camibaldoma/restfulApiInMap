@@ -1,15 +1,21 @@
 package com.inmap.restfulApiInMap.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.inmap.restfulApiInMap.entity.*;
 import com.inmap.restfulApiInMap.service.MateriaService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.*;
 import org.mockito.Mockito;
+import org.n52.jackson.datatype.jts.JtsModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 import java.util.List;
@@ -23,15 +29,18 @@ class MateriaControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
+    @Autowired
+    private ObjectMapper objectMapper; //conversor de Java a JSON
     @MockBean
     private MateriaService materiaService;
 
     private GeometryFactory geometryFactory = new GeometryFactory();
 
     private Recinto recinto1;
+    private Materia materia;
     @BeforeEach
     void setUp() {
+        objectMapper.registerModule(new JtsModule());
         Personal docenteTest = new Personal();
         docenteTest.setIdPersonal("999");
         docenteTest.setNombrePersonal("Camila");
@@ -71,9 +80,9 @@ class MateriaControllerTest {
 
 
         // Se crea la Materia
-        Materia materia = new Materia();
-        materia.setCodMateria("M1T");
-        materia.setNombreMateria("Sistemas Operativos");
+        this.materia = new Materia();
+        this.materia.setCodMateria("M1T");
+        this.materia.setNombreMateria("Sistemas Operativos");
 
 
         // Se crea la Asignación
@@ -98,5 +107,50 @@ class MateriaControllerTest {
         mockMvc.perform(get("/materia/{id}/{hora}/{dia}",idMateria,horaConsulta,diaConsulta))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].idRecinto").value("R50"));
+    }
+    @Test
+    void saveMateria() throws Exception {
+        //Arrange
+        Mockito.when(materiaService.saveMateria(materia)).thenReturn(materia);
+        //Act
+        mockMvc.perform(post("/guardarMateria")
+                        .contentType(MediaType.APPLICATION_JSON) // Se envía JSON
+                        .content(objectMapper.writeValueAsString(materia))) // Se convierte el objeto a JSON String
+                //Assert
+                .andExpect(status().isCreated()) //
+                .andExpect(jsonPath("$.codMateria").value("M1T"))
+                .andExpect(jsonPath("$.nombreMateria").value("Sistemas Operativos"));
+
+    }
+    @Test
+    void updateMateria() throws Exception {
+        //Arrange
+        String id = "M1T";
+        Materia materiaTest = new Materia();
+        materiaTest.setCodMateria(id);
+        materiaTest.setNombreMateria("Materia Test");
+        Mockito.when(materiaService.updateMateria(id,materiaTest)).thenReturn(materiaTest);
+        //Act
+        mockMvc.perform(put("/actualizarMateria/{id}",id)
+                        .contentType(MediaType.APPLICATION_JSON) // Se envía JSON
+                        .content(objectMapper.writeValueAsString(materiaTest))) // Se convierte el objeto a JSON String
+                //Assert
+                .andExpect(status().isOk()) //
+                .andExpect(jsonPath("$.codMateria").value("M1T"))
+                .andExpect(jsonPath("$.nombreMateria").value("Materia Test"));
+
+    }
+    @Test
+    void deleteMateria() throws Exception {
+        //Arrange
+        String id = "M1T";
+        //Act
+        mockMvc.perform(delete("/eliminarMateria/{id}", id)
+                        .contentType(MediaType.APPLICATION_JSON))
+                //Assert
+                .andExpect(status().isOk());
+
+        // Se verifica que el service realmente fue llamado para borrar ese ID
+        verify(materiaService, times(1)).deleteMateria(id);
     }
 }

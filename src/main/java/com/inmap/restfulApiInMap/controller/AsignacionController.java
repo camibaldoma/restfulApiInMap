@@ -1,5 +1,6 @@
 package com.inmap.restfulApiInMap.controller;
 
+import com.inmap.restfulApiInMap.dto.AsignacionRequestDTO;
 import com.inmap.restfulApiInMap.entity.Asignacion;
 import com.inmap.restfulApiInMap.entity.Destino;
 import com.inmap.restfulApiInMap.error.ArgumentNotValidException;
@@ -15,6 +16,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@CrossOrigin(
+        originPatterns = "*",
+        allowCredentials = "true",
+        methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS},
+        allowedHeaders = "*"
+)
+
 public class AsignacionController {
 
     @Autowired
@@ -27,11 +35,11 @@ public class AsignacionController {
         return asignacionService.obtenerTodasAsignaciones(); // Esto hace el SELECT * FROM destino automáticamente
     }
     @PostMapping("/guardarAsignacion")
-    public Asignacion saveAsignacion(@Valid @RequestBody Asignacion asignacion) throws ArgumentNotValidException, OverlapException, NotFoundException {
+    public Asignacion saveAsignacion(@Valid @RequestBody AsignacionRequestDTO asignacion) throws ArgumentNotValidException, OverlapException, NotFoundException {
         return asignacionService.saveAsignacion(asignacion);
     }
     @PutMapping("/actualizarAsignacion/{id}")
-    public Asignacion updateAsignacion(@PathVariable String id, @Valid @RequestBody Asignacion asignacion) throws ArgumentNotValidException, OverlapException, NotFoundException {
+    public Asignacion updateAsignacion(@PathVariable String id, @RequestBody AsignacionRequestDTO asignacion) throws ArgumentNotValidException, OverlapException, NotFoundException {
         return asignacionService.updateAsignacion(id, asignacion);
     }
     @DeleteMapping("/eliminarAsignacion/{id}")

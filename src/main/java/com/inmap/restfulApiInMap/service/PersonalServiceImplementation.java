@@ -1,11 +1,14 @@
 package com.inmap.restfulApiInMap.service;
 
-import com.inmap.restfulApiInMap.classes.UbicacionPersonal;
+
+import com.inmap.restfulApiInMap.dto.PersonalReducidoDTO;
+import com.inmap.restfulApiInMap.dto.PersonalRequestDTO;
+import com.inmap.restfulApiInMap.dto.UbicacionPersonalDTO;
 import com.inmap.restfulApiInMap.entity.Personal;
 import com.inmap.restfulApiInMap.entity.Recinto;
 import com.inmap.restfulApiInMap.error.ArgumentNotValidException;
 import com.inmap.restfulApiInMap.error.NotFoundException;
-import com.inmap.restfulApiInMap.interfaces.PersonalReducido;
+
 import com.inmap.restfulApiInMap.repository.PersonalRepository;
 import com.inmap.restfulApiInMap.repository.RecintoRepository;
 import org.geolatte.geom.jts.JTS;
@@ -29,12 +32,12 @@ public class PersonalServiceImplementation implements PersonalService{
         return personalRepository.findAll();
     }
     @Override
-    public List<PersonalReducido> findAllOrderByApellido(){
+    public List<PersonalReducidoDTO> findAllOrderByApellido(){
         return personalRepository.findAllOrderByApellido();
     }
 
     @Override
-    public List<UbicacionPersonal> findUbicacionCompletaNative(String id,String dia,String hora) throws NotFoundException
+    public List<UbicacionPersonalDTO> findUbicacionCompletaNative(String id, String dia, String hora) throws NotFoundException
     {
         List<Object[]> resultados = personalRepository.findUbicacionCompletaNative(id, dia, hora);
         if(resultados == null || resultados.isEmpty())
@@ -58,7 +61,7 @@ public class PersonalServiceImplementation implements PersonalService{
             Geometry jtsGeom = JTS.to(geoLatteGeom);
 
             //Se crea el objeto
-            return new UbicacionPersonal(
+            return new UbicacionPersonalDTO(
                     (String) fila[0],
                     (String) fila[1],
                     (String) fila[2],
@@ -69,22 +72,32 @@ public class PersonalServiceImplementation implements PersonalService{
     }
 
     @Override
-    public Personal savePersonal(Personal personal) {
-        if (personalRepository.existsById(personal.getIdPersonal())) {
-            throw new ArgumentNotValidException("El ID ya existe, no se puede usar uno duplicado");
+    public Personal savePersonal(PersonalRequestDTO personal) throws ArgumentNotValidException{
+        //Verificar duplicado lógico ( DNI)
+        if (personalRepository.existsByDni(personal.getDni())) {
+            throw new ArgumentNotValidException("Ya existe una persona registrada con ese DNI");
         }
-        return personalRepository.save(personal);
+        Integer ultimoIdNumerico = personalRepository.findMaxId();
+        String nuevoId;
+        if (ultimoIdNumerico == null) {
+            nuevoId = String.valueOf(1);
+        } else {
+            int numeroSiguiente =ultimoIdNumerico + 1;
+            nuevoId = String.valueOf(numeroSiguiente);
+        }
+        Personal personalNuevo = new Personal();
+        personalNuevo.setIdPersonal(nuevoId);
+        personalNuevo.setNombrePersonal(personal.getNombrePersonal());
+        personalNuevo.setApellidoPersonal(personal.getApellidoPersonal());
+        personalNuevo.setDni(personal.getDni());
+        personalNuevo.setCargoLaboral(personal.getCargoLaboral());
+        return personalRepository.save(personalNuevo);
     }
 
     @Override
-    public Personal updatePersonal(String idPersonal, Personal personal) {
+    public Personal updatePersonal(String idPersonal, PersonalRequestDTO personal) {
         Personal personalToUpdate = personalRepository.findById(idPersonal).orElseThrow(() -> new NotFoundException("Miembro del personal no encontrado"));
-        if (personal.getIdPersonal() != null && !idPersonal.equals(personal.getIdPersonal())) {
-            throw new ArgumentNotValidException("No está permitido cambiar el ID de un miembro del personal.");
-        }
-        if(Objects.nonNull(personal.getIdPersonal()) && !"".equalsIgnoreCase(personal.getIdPersonal())){
-            personalToUpdate.setIdPersonal(personal.getIdPersonal());
-        }
+
         if(Objects.nonNull(personal.getNombrePersonal()) && !"".equalsIgnoreCase(personal.getNombrePersonal())){
             personalToUpdate.setNombrePersonal(personal.getNombrePersonal());
         }

@@ -1,18 +1,18 @@
-package com.inmap.restfulApiInMap.classes;
+package com.inmap.restfulApiInMap.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
+import com.inmap.restfulApiInMap.classes.GeoJsonHelper;
 import lombok.Data;
 import org.locationtech.jts.geom.Geometry;
 
 import java.util.HashMap;
 import java.util.Map;
-
-//No funcionó como Interfaz porque no mapeaba bien la geometría
 @Data
-@AllArgsConstructor
-public class DestinoReducido {
+public class InformacionRecintoDTO {
+    private String idDestino;
+    private String idRecinto;
     private String nombreDestino;
+    private String nombreMateria;
 
     // Hibernate inyectará aquí el objeto JTS correctamente
     private Geometry geometria;
@@ -24,5 +24,12 @@ public class DestinoReducido {
         geoJson.put("type", geometria.getGeometryType());
         geoJson.put("coordinates", GeoJsonHelper.convertToCoordinates(geometria));
         return geoJson;
+    }
+    public InformacionRecintoDTO(String idDestino, String idRecinto, String nombreDestino, String nombreMateria, Geometry geometria) {
+        this.idDestino = idDestino;
+        this.idRecinto = idRecinto;
+        this.nombreDestino = nombreDestino;
+        this.nombreMateria = nombreMateria;
+        this.geometria = geometria;
     }
 }

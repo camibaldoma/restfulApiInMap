@@ -1,6 +1,7 @@
 package com.inmap.restfulApiInMap.service;
 
-import com.inmap.restfulApiInMap.classes.InformacionRecinto;
+
+import com.inmap.restfulApiInMap.dto.InformacionRecintoDTO;
 import com.inmap.restfulApiInMap.entity.Destino;
 import com.inmap.restfulApiInMap.entity.Recinto;
 import com.inmap.restfulApiInMap.error.ArgumentNotValidException;
@@ -13,7 +14,7 @@ import java.util.List;
 public interface RecintoService {
     List<Recinto> obtenerTodosRecintos();
     List<Recinto> findRecinto(String id) throws NotFoundException;
-    List<InformacionRecinto> findInformation(String id, String hora, String dia ) throws NotFoundException,OverlapException;
+    List<InformacionRecintoDTO> findInformation(String id, String hora, String dia ) throws NotFoundException,OverlapException;
     List<Recinto> findRecintoBlocked();
     Recinto saveRecinto(Recinto recinto) throws ArgumentNotValidException, OverlapException;
     Recinto updateRecinto(String id, Recinto recinto) throws NotFoundException,ArgumentNotValidException;
